@@ -1,0 +1,10 @@
+# frozen_string_literal: true
+
+require "spec_helper"
+
+RSpec.describe "Performance Placeholder" do
+  it "placeholder for performance tests" do
+    # Performance benchmarks will be implemented in future tasks
+    expect(true).to be true
+  end
+end

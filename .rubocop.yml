@@ -1,0 +1,174 @@
+# RuboCop configuration for A2A Ruby SDK
+# Following a2a-python's ruff configuration patterns
+
+require:
+  - rubocop-rails
+  - rubocop-rspec
+  - rubocop-performance
+
+AllCops:
+  TargetRubyVersion: 2.7
+  NewCops: enable
+  SuggestExtensions: false
+  Exclude:
+    - 'vendor/**/*'
+    - 'spec/fixtures/**/*'
+    - 'tmp/**/*'
+    - 'bin/**/*'
+    - 'node_modules/**/*'
+    - 'coverage/**/*'
+    - 'sorbet/**/*'
+
+# Layout and formatting (equivalent to ruff's formatting rules)
+Layout/LineLength:
+  Max: 120
+  AllowedPatterns: 
+    - '\A\s*#'  # Allow long comments
+    - 'https?://'  # Allow long URLs
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+Layout/MultilineOperationIndentation:
+  EnforcedStyle: indented
+
+Layout/ParameterAlignment:
+  EnforcedStyle: with_fixed_indentation
+
+Layout/ArgumentAlignment:
+  EnforcedStyle: with_fixed_indentation
+
+# Style rules (following a2a-python conventions)
+Style/Documentation:
+  Enabled: true
+  Exclude:
+    - 'spec/**/*'
+    - 'test/**/*'
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  EnforcedStyle: always
+
+Style/ClassAndModuleChildren:
+  EnforcedStyle: compact
+
+Style/HashSyntax:
+  EnforcedStyle: ruby19_no_mixed_keys
+
+# Metrics (equivalent to ruff's complexity rules)
+Metrics/BlockLength:
+  Max: 25
+  Exclude:
+    - 'spec/**/*'
+    - 'test/**/*'
+    - 'lib/generators/**/*'
+    - '*.gemspec'
+    - 'config/routes.rb'
+
+Metrics/MethodLength:
+  Max: 15
+  Exclude:
+    - 'spec/**/*'
+    - 'test/**/*'
+
+Metrics/ClassLength:
+  Max: 100
+  Exclude:
+    - 'spec/**/*'
+    - 'test/**/*'
+
+Metrics/ModuleLength:
+  Max: 100
+  Exclude:
+    - 'spec/**/*'
+    - 'test/**/*'
+
+Metrics/CyclomaticComplexity:
+  Max: 8
+
+Metrics/PerceivedComplexity:
+  Max: 8
+
+Metrics/AbcSize:
+  Max: 20
+
+# Naming conventions
+Naming/FileName:
+  Exclude:
+    - 'lib/a2a-ruby.rb'
+
+Naming/VariableNumber:
+  EnforcedStyle: snake_case
+
+# Performance rules
+Performance/StringReplacement:
+  Enabled: true
+
+Performance/RedundantBlockCall:
+  Enabled: true
+
+# Rails-specific rules
+Rails/FilePath:
+  Enabled: false
+
+Rails/Output:
+  Exclude:
+    - 'bin/**/*'
+
+Rails/RakeEnvironment:
+  Enabled: false
+
+# RSpec-specific rules (equivalent to pytest configuration)
+RSpec/ExampleLength:
+  Max: 25
+
+RSpec/MultipleExpectations:
+  Max: 8
+
+RSpec/NestedGroups:
+  Max: 5
+
+RSpec/DescribeClass:
+  Exclude:
+    - 'spec/integration/**/*'
+    - 'spec/system/**/*'
+
+RSpec/FilePath:
+  Enabled: true
+  CustomTransform:
+    A2A: a2a
+
+RSpec/ContextWording:
+  Prefixes:
+    - when
+    - with
+    - without
+    - if
+    - unless
+    - for
+
+RSpec/DescribedClass:
+  Enabled: true
+
+RSpec/InstanceVariable:
+  AssignmentOnly: false
+
+# Security rules
+Security/YAMLLoad:
+  Enabled: true
+
+Security/Eval:
+  Enabled: true
+
+# Bundler rules
+Bundler/OrderedGems:
+  Enabled: true
+
+Bundler/DuplicatedGem:
+  Enabled: true

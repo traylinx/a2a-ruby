@@ -1,0 +1,319 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+##
+# A2A Ruby Gem Performance Test Runner
+#
+# This script provides a convenient way to run performance tests with
+# proper configuration and reporting.
+#
+
+require 'optparse'
+require 'fileutils'
+
+class PerformanceTestRunner
+  def initialize
+    @options = {
+      test_type: :all,
+      output_dir: 'tmp/performance_results',
+      baseline: false,
+      regression: false,
+      load_test: false,
+      memory_profile: false,
+      verbose: false,
+      parallel: false
+    }
+    
+    parse_options
+    setup_environment
+  end
+
+  def run
+    puts "A2A Ruby Gem Performance Test Runner"
+    puts "=" * 50
+    
+    create_output_directory
+    
+    case @options[:test_type]
+    when :all
+      run_all_tests
+    when :benchmark
+      run_benchmark_tests
+    when :memory
+      run_memory_tests
+    when :load
+      run_load_tests
+    when :regression
+      run_regression_tests
+    when :compliance
+      run_compliance_tests
+    else
+      puts "Unknown test type: #{@options[:test_type]}"
+      exit 1
+    end
+    
+    generate_summary_report
+  end
+
+  private
+
+  def parse_options
+    OptionParser.new do |opts|
+      opts.banner = "Usage: #{$0} [options]"
+      
+      opts.on("-t", "--type TYPE", [:all, :benchmark, :memory, :load, :regression, :compliance],
+              "Test type (all, benchmark, memory, load, regression, compliance)") do |type|
+        @options[:test_type] = type
+      end
+      
+      opts.on("-o", "--output DIR", "Output directory for results") do |dir|
+        @options[:output_dir] = dir
+      end
+      
+      opts.on("-b", "--baseline", "Create new performance baselines") do
+        @options[:baseline] = true
+      end
+      
+      opts.on("-r", "--regression", "Run regression detection") do
+        @options[:regression] = true
+      end
+      
+      opts.on("-l", "--load", "Run load tests") do
+        @options[:load_test] = true
+      end
+      
+      opts.on("-m", "--memory", "Run memory profiling") do
+        @options[:memory_profile] = true
+      end
+      
+      opts.on("-v", "--verbose", "Verbose output") do
+        @options[:verbose] = true
+      end
+      
+      opts.on("-p", "--parallel", "Run tests in parallel") do
+        @options[:parallel] = true
+      end
+      
+      opts.on("-h", "--help", "Show this help") do
+        puts opts
+        exit
+      end
+    end.parse!
+  end
+
+  def setup_environment
+    # Set environment variables for performance testing
+    ENV['RUN_PERFORMANCE_TESTS'] = 'true'
+    ENV['RUN_LOAD_TESTS'] = 'true' if @options[:load_test]
+    ENV['RUN_REGRESSION_TESTS'] = 'true' if @options[:regression]
+    ENV['RUN_INTEROPERABILITY_TESTS'] = 'true'
+    
+    # Disable GC during tests for more consistent measurements
+    ENV['DISABLE_GC_DURING_PERFORMANCE_TESTS'] = 'true'
+    
+    # Set output directory
+    ENV['PERFORMANCE_OUTPUT_DIR'] = @options[:output_dir]
+    
+    puts "Environment configured for performance testing" if @options[:verbose]
+  end
+
+  def create_output_directory
+    FileUtils.mkdir_p(@options[:output_dir])
+    puts "Results will be saved to: #{@options[:output_dir]}" if @options[:verbose]
+  end
+
+  def run_all_tests
+    puts "Running all performance tests..."
+    
+    tests = [
+      { name: "Benchmark Suite", command: benchmark_command },
+      { name: "Memory Profiling", command: memory_command },
+      { name: "Compliance Tests", command: compliance_command }
+    ]
+    
+    tests << { name: "Load Testing", command: load_command } if @options[:load_test]
+    tests << { name: "Regression Detection", command: regression_command } if @options[:regression]
+    
+    run_test_suite(tests)
+  end
+
+  def run_benchmark_tests
+    puts "Running benchmark tests..."
+    run_single_test("Benchmark Suite", benchmark_command)
+  end
+
+  def run_memory_tests
+    puts "Running memory profiling tests..."
+    run_single_test("Memory Profiling", memory_command)
+  end
+
+  def run_load_tests
+    puts "Running load tests..."
+    run_single_test("Load Testing", load_command)
+  end
+
+  def run_regression_tests
+    puts "Running regression detection tests..."
+    run_single_test("Regression Detection", regression_command)
+  end
+
+  def run_compliance_tests
+    puts "Running compliance tests..."
+    run_single_test("Compliance Tests", compliance_command)
+  end
+
+  def run_test_suite(tests)
+    results = []
+    
+    tests.each do |test|
+      puts "\n" + "=" * 50
+      puts "Running: #{test[:name]}"
+      puts "=" * 50
+      
+      start_time = Time.current
+      success = run_command(test[:command])
+      end_time = Time.current
+      
+      results << {
+        name: test[:name],
+        success: success,
+        duration: end_time - start_time
+      }
+      
+      status = success ? "PASSED" : "FAILED"
+      puts "#{test[:name]}: #{status} (#{(end_time - start_time).round(2)}s)"
+    end
+    
+    save_results_summary(results)
+  end
+
+  def run_single_test(name, command)
+    puts "Running: #{name}"
+    start_time = Time.current
+    success = run_command(command)
+    end_time = Time.current
+    
+    status = success ? "PASSED" : "FAILED"
+    puts "#{name}: #{status} (#{(end_time - start_time).round(2)}s)"
+    
+    save_results_summary([{
+      name: name,
+      success: success,
+      duration: end_time - start_time
+    }])
+  end
+
+  def run_command(command)
+    if @options[:verbose]
+      system(command)
+    else
+      system(command, out: File::NULL, err: File::NULL)
+    end
+  end
+
+  def benchmark_command
+    cmd = "bundle exec rspec spec/performance/benchmark_suite_spec.rb"
+    cmd += " --format json --out #{@options[:output_dir]}/benchmark_results.json"
+    cmd += " --format progress" if @options[:verbose]
+    cmd
+  end
+
+  def memory_command
+    cmd = "bundle exec rspec spec/performance/memory_profiling_spec.rb"
+    cmd += " --format json --out #{@options[:output_dir]}/memory_results.json"
+    cmd += " --format progress" if @options[:verbose]
+    cmd
+  end
+
+  def load_command
+    cmd = "bundle exec rspec spec/performance/load_testing_spec.rb"
+    cmd += " --format json --out #{@options[:output_dir]}/load_test_results.json"
+    cmd += " --format progress" if @options[:verbose]
+    cmd
+  end
+
+  def regression_command
+    cmd = "bundle exec rspec spec/performance/regression_detection_spec.rb"
+    cmd += " --format json --out #{@options[:output_dir]}/regression_results.json"
+    cmd += " --format progress" if @options[:verbose]
+    cmd
+  end
+
+  def compliance_command
+    cmd = "bundle exec rspec spec/compliance/"
+    cmd += " --format json --out #{@options[:output_dir]}/compliance_results.json"
+    cmd += " --format progress" if @options[:verbose]
+    cmd
+  end
+
+  def save_results_summary(results)
+    summary = {
+      timestamp: Time.current.iso8601,
+      ruby_version: RUBY_VERSION,
+      platform: RUBY_PLATFORM,
+      options: @options,
+      results: results,
+      summary: {
+        total_tests: results.length,
+        passed: results.count { |r| r[:success] },
+        failed: results.count { |r| !r[:success] },
+        total_duration: results.sum { |r| r[:duration] }
+      }
+    }
+    
+    File.write(
+      File.join(@options[:output_dir], 'test_summary.json'),
+      JSON.pretty_generate(summary)
+    )
+  end
+
+  def generate_summary_report
+    puts "\n" + "=" * 50
+    puts "Performance Test Summary"
+    puts "=" * 50
+    
+    summary_file = File.join(@options[:output_dir], 'test_summary.json')
+    
+    if File.exist?(summary_file)
+      summary = JSON.parse(File.read(summary_file))
+      
+      puts "Timestamp: #{summary['timestamp']}"
+      puts "Ruby Version: #{summary['ruby_version']}"
+      puts "Platform: #{summary['platform']}"
+      puts "Output Directory: #{@options[:output_dir]}"
+      puts ""
+      puts "Results:"
+      
+      summary['results'].each do |result|
+        status = result['success'] ? "PASSED" : "FAILED"
+        duration = result['duration'].round(2)
+        puts "  #{result['name']}: #{status} (#{duration}s)"
+      end
+      
+      puts ""
+      puts "Summary:"
+      puts "  Total Tests: #{summary['summary']['total_tests']}"
+      puts "  Passed: #{summary['summary']['passed']}"
+      puts "  Failed: #{summary['summary']['failed']}"
+      puts "  Total Duration: #{summary['summary']['total_duration'].round(2)}s"
+      
+      if summary['summary']['failed'] > 0
+        puts ""
+        puts "Some tests failed. Check individual result files for details."
+        exit 1
+      else
+        puts ""
+        puts "All tests passed successfully!"
+      end
+    else
+      puts "No summary file found. Tests may not have completed successfully."
+      exit 1
+    end
+  end
+end
+
+# Run the performance test runner
+if __FILE__ == $0
+  runner = PerformanceTestRunner.new
+  runner.run
+end

@@ -1,0 +1,58 @@
+# Gem build artifacts
+*.gem
+/.bundle/
+/pkg/
+/vendor/bundle/
+
+# Documentation
+/.yardoc
+/_yardoc/
+/doc/
+
+# Test coverage
+/coverage/
+
+# Test artifacts
+/spec/reports/
+.rspec_status
+rspec.xml
+
+# Temporary files
+/tmp/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE files
+.vscode/
+.idea/
+.cursor/
+/nbproject/
+*.swp
+*.swo
+*.tmproj
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Ruby version managers
+.ruby-version
+.rvmrc
+
+# Bundler
+Gemfile.lock
+/.gems
+/.rbenv-gemsets
+
+# Debugging
+.byebug_history
+
+# AI IDEs
+.kiro
+.cursor
