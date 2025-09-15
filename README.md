@@ -144,17 +144,12 @@ end
 
 ## Documentation
 
-📚 **[Complete Documentation](docs/README.md)** - Comprehensive guides and references
-
-**Quick Links:**
-- [Getting Started Guide](docs/getting_started.md) - Installation to first agent
-- [Rails Integration](docs/rails.md) - Full Rails integration guide  
-- [Sinatra Integration](docs/sinatra.md) - Lightweight web services
-- [Plain Ruby Usage](docs/plain_ruby.md) - CLI tools and standalone apps
+**Essential Guides:**
+- [Getting Started](docs/getting_started.md) - Installation and first steps
+- [Integration Guide](docs/integration.md) - Rails, Sinatra, and plain Ruby integration
 - [API Reference](docs/api_reference.md) - Complete API documentation
-- [Deployment Guide](docs/deployment.md) - Production deployment
-- [Troubleshooting](docs/troubleshooting.md) - Common issues and solutions
-- [FAQ](docs/faq.md) - Frequently asked questions
+- [Configuration](docs/configuration.md) - Configuration options
+- [Troubleshooting](docs/troubleshooting.md) - Common issues, errors, and FAQ
 
 ## Development
 

@@ -11,7 +11,7 @@ This guide helps you diagnose and resolve common issues when using the A2A Ruby 
 - [Rails Integration Issues](#rails-integration-issues)
 - [Debugging Tools](#debugging-tools)
 - [Common Error Codes](#common-error-codes)
-- [FAQ](#faq)
+- [Frequently Asked Questions](#frequently-asked-questions)
 
 ## Connection Issues
 
@@ -500,6 +500,64 @@ printer = RubyProf::FlatPrinter.new(result)
 printer.print(STDOUT)
 ```
 
+## Error Hierarchy
+
+The A2A Ruby SDK provides a comprehensive error hierarchy:
+
+```
+StandardError
+└── A2A::Errors::A2AError
+    ├── JSON-RPC Standard Errors
+    │   ├── A2A::Errors::ParseError (-32700)
+    │   ├── A2A::Errors::InvalidRequest (-32600)
+    │   ├── A2A::Errors::MethodNotFound (-32601)
+    │   ├── A2A::Errors::InvalidParams (-32602)
+    │   └── A2A::Errors::InternalError (-32603)
+    ├── A2A Protocol Errors
+    │   ├── A2A::Errors::TaskNotFound (-32001)
+    │   ├── A2A::Errors::TaskNotCancelable (-32002)
+    │   └── A2A::Errors::AuthenticationRequired (-32003)
+    ├── Transport Errors
+    │   ├── A2A::Errors::HTTPError
+    │   ├── A2A::Errors::TimeoutError
+    │   └── A2A::Errors::ConnectionError
+    └── Configuration Errors
+        └── A2A::Errors::ConfigurationError
+```
+
+## Error Handling Patterns
+
+### Client-Side Error Handling
+
+```ruby
+begin
+  response = client.send_message(message)
+rescue A2A::Errors::MethodNotFound => e
+  puts "Method not supported: #{e.message}"
+rescue A2A::Errors::AuthenticationRequired => e
+  puts "Authentication needed: #{e.message}"
+rescue A2A::Errors::HTTPError => e
+  puts "HTTP error: #{e.message}"
+rescue A2A::Errors::A2AError => e
+  puts "A2A error: #{e.message}"
+end
+```
+
+### Server-Side Error Handling
+
+```ruby
+a2a_method "risky_operation" do |params|
+  begin
+    # Your operation
+    { success: true }
+  rescue ArgumentError => e
+    raise A2A::Errors::InvalidParams, "Invalid parameters: #{e.message}"
+  rescue StandardError => e
+    raise A2A::Errors::InternalError, "Operation failed: #{e.message}"
+  end
+end
+```
+
 ## Common Error Codes
 
 ### JSON-RPC Standard Errors
@@ -527,7 +585,67 @@ printer.print(STDOUT)
 | -32009 | Invalid message format | Message doesn't match schema |
 | -32010 | Service unavailable | Temporary service outage |
 
-## FAQ
+## Frequently Asked Questions
+
+### What Ruby versions are supported?
+
+- Ruby 2.7 or higher
+- Rails 6.0+ (for Rails integration)  
+- JRuby and TruffleRuby compatibility
+
+### Do I need Rails to use A2A Ruby SDK?
+
+No! The SDK works with any Ruby application:
+- Plain Ruby scripts
+- Sinatra applications
+- Rack applications  
+- Rails applications (with enhanced integration)
+
+### How do I connect to an A2A agent?
+
+```ruby
+require 'a2a'
+
+client = A2A::Client::HttpClient.new("https://agent.example.com/a2a")
+
+message = A2A::Types::Message.new(
+  message_id: SecureRandom.uuid,
+  role: "user", 
+  parts: [A2A::Types::TextPart.new(text: "Hello!")]
+)
+
+client.send_message(message) do |response|
+  puts response
+end
+```
+
+### How do I handle authentication?
+
+```ruby
+# OAuth 2.0
+client = A2A::Client::HttpClient.new("https://agent.example.com/a2a") do |config|
+  config.auth_strategy = :oauth2
+  config.oauth2_token = "your_access_token"
+end
+
+# API Key
+client = A2A::Client::HttpClient.new("https://agent.example.com/a2a") do |config|
+  config.auth_strategy = :api_key
+  config.api_key = "your_api_key"
+end
+```
+
+### How do I create a simple agent?
+
+```ruby
+class MyAgent
+  include A2A::Server::Agent
+  
+  a2a_method "greet" do |params|
+    { message: "Hello, #{params[:name] || 'there'}!" }
+  end
+end
+```
 
 ### Q: Why am I getting SSL certificate errors?
 
