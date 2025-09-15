@@ -10,13 +10,13 @@ Gem::Specification.new do |spec|
 
   spec.summary = "Agent2Agent (A2A) Protocol implementation for Ruby"
   spec.description = "Complete A2A Protocol implementation for Ruby applications, enabling agent-to-agent communication via JSON-RPC 2.0, gRPC, and HTTP+JSON transports"
-  spec.homepage = "https://github.com/a2aproject/a2a-ruby"
+  spec.homepage = "https://github.com/traylinx/a2a-ruby"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 2.7.0"
 
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "https://github.com/a2aproject/a2a-ruby"
-  spec.metadata["changelog_uri"] = "https://github.com/a2aproject/a2a-ruby/blob/main/CHANGELOG.md"
+  spec.metadata["source_code_uri"] = "https://github.com/traylinx/a2a-ruby"
+  spec.metadata["changelog_uri"] = "https://github.com/traylinx/a2a-ruby/blob/main/CHANGELOG.md"
   spec.metadata["documentation_uri"] = "https://a2a-protocol.org/latest/sdk/ruby/"
 
   # Specify which files should be added to the gem when it is released
