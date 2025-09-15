@@ -1,8 +1,9 @@
 # A2A Ruby SDK
 
-[![Gem Version](https://badge.fury.io/rb/a2a-ruby.svg)](https://badge.fury.io/rb/a2a-ruby)
-[![Build Status](https://github.com/a2aproject/a2a-ruby/workflows/CI/badge.svg)](https://github.com/a2aproject/a2a-ruby/actions)
-[![Coverage Status](https://coveralls.io/repos/github/a2aproject/a2a-ruby/badge.svg?branch=main)](https://coveralls.io/github/a2aproject/a2a-ruby?branch=main)
+[![Build Status](https://github.com/traylinx/a2a-ruby/workflows/CI/badge.svg)](https://github.com/traylinx/a2a-ruby/actions)
+[![Ruby Version](https://img.shields.io/badge/ruby-%3E%3D%202.7.0-ruby.svg)](https://ruby-lang.org)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
+[![A2A Protocol](https://img.shields.io/badge/A2A%20Protocol-v0.3.0-green.svg)](https://github.com/google/agent2agent)
 
 The A2A Ruby SDK provides a complete implementation of Google's Agent2Agent (A2A) Protocol for Ruby applications. It enables seamless agent-to-agent communication via JSON-RPC 2.0, gRPC, and HTTP+JSON transports.
 
