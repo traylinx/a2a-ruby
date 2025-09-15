@@ -19,7 +19,7 @@ end
 # Provides JSON-RPC 2.0 over HTTP(S) communication with A2A agents,
 # including support for streaming responses via Server-Sent Events.
 #
-class A2A::Client::HttpClient < Base
+class A2A::Client::HttpClient < A2A::Client::Base
   attr_reader :endpoint_url, :connection
 
   ##

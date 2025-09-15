@@ -83,7 +83,7 @@ module A2A::Server
       #   end
       #
       def a2a_method(name, **options, &block)
-        raise ArgumentError, "Method name is required" if name.blank?
+        raise ArgumentError, "Method name is required" if name.nil? || (respond_to?(:empty?) && empty?) || (is_a?(String) && strip.empty?)
         raise ArgumentError, "Method block is required" unless block_given?
 
         method_name = name.to_s
@@ -115,7 +115,7 @@ module A2A::Server
       #   end
       #
       def a2a_capability(name, &block)
-        raise ArgumentError, "Capability name is required" if name.blank?
+        raise ArgumentError, "Capability name is required" if name.nil? || (respond_to?(:empty?) && empty?) || (is_a?(String) && strip.empty?)
         raise ArgumentError, "Capability block is required" unless block_given?
 
         builder = CapabilityBuilder.new(name.to_s)

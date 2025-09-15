@@ -41,7 +41,7 @@ class <%= model_class_name("task") %> < ApplicationRecord
 
   # Soft delete
   def soft_delete!
-    update!(deleted_at: Time.current)
+    update!(deleted_at: Time.now)
   end
 
   def deleted?
@@ -67,7 +67,7 @@ class <%= model_class_name("task") %> < ApplicationRecord
       self.status_progress = new_status.progress
       self.status_result = new_status.result
       self.status_error = new_status.error
-      self.status_updated_at = Time.current
+      self.status_updated_at = Time.now
     elsif new_status.is_a?(Hash)
       self.status = A2A::Types::TaskStatus.from_h(new_status)
     else
@@ -155,7 +155,7 @@ class <%= model_class_name("task") %> < ApplicationRecord
       status_progress: task.status.progress,
       status_result: task.status.result,
       status_error: task.status.error,
-      status_updated_at: task.status.updated_at ? Time.parse(task.status.updated_at) : Time.current,
+      status_updated_at: task.status.updated_at ? Time.parse(task.status.updated_at) : Time.now,
       artifacts: task.artifacts&.map(&:to_h),
       history: task.history&.map(&:to_h),
       metadata: task.metadata
@@ -164,7 +164,7 @@ class <%= model_class_name("task") %> < ApplicationRecord
 
   # Search and filtering
   def self.search(query)
-    return all if query.blank?
+    return all if query.nil? || (respond_to?(:empty?) && empty?) || (is_a?(String) && strip.empty?)
     
     where(
       "status_message ILIKE ? OR metadata::text ILIKE ?", 
@@ -189,7 +189,7 @@ class <%= model_class_name("task") %> < ApplicationRecord
 
   def update_status_timestamp
     if status_state_changed?
-      self.status_updated_at = Time.current
+      self.status_updated_at = Time.now
     end
   end
 

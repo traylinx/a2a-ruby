@@ -59,7 +59,7 @@ class A2A::Server::Middleware::LoggingMiddleware
   # @yield Block to continue the middleware chain
   # @return [Object] The result from the next middleware or handler
   def call(request, context)
-    start_time = Time.zone.now
+    start_time = Time.now
     request_id = generate_request_id(request, context)
 
     # Log request start
@@ -70,13 +70,13 @@ class A2A::Server::Middleware::LoggingMiddleware
       result = yield
 
       # Log successful completion
-      duration = Time.zone.now - start_time
+      duration = Time.now - start_time
       log_request_success(request, context, result, duration, request_id)
 
       result
     rescue StandardError => e
       # Log error
-      duration = Time.zone.now - start_time
+      duration = Time.now - start_time
       log_request_error(request, context, e, duration, request_id)
 
       # Re-raise the error

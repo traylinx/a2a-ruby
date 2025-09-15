@@ -80,7 +80,7 @@ class A2A::Rails::A2aController < ApplicationController
     render json: {
       status: "healthy",
       version: A2A::VERSION,
-      timestamp: Time.current.iso8601,
+      timestamp: Time.now.iso8601,
       rails_version: ::Rails.version
     }
   end
@@ -117,7 +117,7 @@ class A2A::Rails::A2aController < ApplicationController
         break if response.stream.closed?
 
         sleep 1
-        sse.write_event("heartbeat", { timestamp: Time.current.iso8601 })
+        sse.write_event("heartbeat", { timestamp: Time.now.iso8601 })
       end
     rescue A2A::Errors::TaskNotFound
       render json: { error: "Task not found" }, status: :not_found

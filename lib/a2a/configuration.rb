@@ -278,7 +278,7 @@ class A2A::Configuration
   # @param other [Configuration] Configuration to merge from
   # @return [self]
   def merge!(other)
-    return self unless other.is_a?(Configuration)
+    return self unless other.is_a?(A2A::Configuration)
 
     other.to_h.each do |key, value|
       setter = "#{key}="
@@ -370,7 +370,7 @@ class A2A::Configuration
   def validate_basic_config
     raise A2A::Errors::ConfigurationError, "default_timeout must be positive" if default_timeout <= 0
 
-    if protocol_version.blank?
+    if protocol_version.nil? || (respond_to?(:empty?) && empty?) || (is_a?(String) && strip.empty?)
       raise A2A::Errors::ConfigurationError,
         "protocol_version cannot be blank"
     end

@@ -69,7 +69,7 @@ class A2A::Transport::Http
   # @raise [A2A::Errors::TransportError] On transport errors
   #
   def request(method, path = "", params: {}, headers: {}, body: nil)
-    start_time = Time.zone.now
+    start_time = Time.now
 
     begin
       response = @connection.public_send(method, path) do |req|
@@ -78,18 +78,18 @@ class A2A::Transport::Http
         req.body = prepare_body(body) if body
       end
 
-      record_metrics(method, response.status, Time.zone.now - start_time)
+      record_metrics(method, response.status, Time.now - start_time)
       handle_response(response)
       response
     rescue A2A::Errors::HTTPError => e
       # Re-raise A2A HTTP errors (from handle_response)
-      record_metrics(method, e.status_code || :http_error, Time.zone.now - start_time)
+      record_metrics(method, e.status_code || :http_error, Time.now - start_time)
       raise e
     rescue Faraday::TimeoutError => e
-      record_metrics(method, :timeout, Time.zone.now - start_time)
+      record_metrics(method, :timeout, Time.now - start_time)
       raise A2A::Errors::TimeoutError, "Request timeout: #{e.message}"
     rescue Faraday::ConnectionFailed => e
-      record_metrics(method, :connection_failed, Time.zone.now - start_time)
+      record_metrics(method, :connection_failed, Time.now - start_time)
       # Check if it's a timeout-like error
       if e.message.include?("timeout") || e.message.include?("execution expired")
         raise A2A::Errors::TimeoutError, "Request timeout: #{e.message}"
@@ -97,10 +97,10 @@ class A2A::Transport::Http
 
       raise A2A::Errors::TransportError, "Connection failed: #{e.message}"
     rescue Faraday::SSLError => e
-      record_metrics(method, :ssl_error, Time.zone.now - start_time)
+      record_metrics(method, :ssl_error, Time.now - start_time)
       raise A2A::Errors::TransportError, "SSL error: #{e.message}"
     rescue Faraday::ClientError => e
-      record_metrics(method, :client_error, Time.zone.now - start_time)
+      record_metrics(method, :client_error, Time.now - start_time)
       # Handle HTTP status errors from Faraday
       raise A2A::Errors::TransportError, "Client error: #{e.message}" unless e.response && e.response[:status]
 
@@ -126,7 +126,7 @@ class A2A::Transport::Http
         )
       end
     rescue StandardError => e
-      record_metrics(method, :error, Time.zone.now - start_time)
+      record_metrics(method, :error, Time.now - start_time)
       # Check if it's a timeout-like error
       if e.message.include?("timeout") || e.message.include?("execution expired")
         raise A2A::Errors::TimeoutError, "Request timeout: #{e.message}"

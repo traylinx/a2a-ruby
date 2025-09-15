@@ -221,7 +221,7 @@ class A2A::Server::Handler
   def validate_request(request)
     raise A2A::Errors::InvalidRequest, "Invalid request object" unless request.is_a?(A2A::Protocol::Request)
 
-    raise A2A::Errors::InvalidRequest, "Method name is required" if request.method.blank?
+    raise A2A::Errors::InvalidRequest, "Method name is required" if request.method.nil? || (respond_to?(:empty?) && empty?) || (is_a?(String) && strip.empty?)
 
     return if request.params.is_a?(Hash) || request.params.is_a?(Array)
 

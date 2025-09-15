@@ -402,7 +402,7 @@ module A2A
           permissions: current_user_permissions,
           authentication_context: {
             strategy: self.class.a2a_auth_config[:strategy],
-            authenticated_at: Time.current.iso8601
+            authenticated_at: Time.now.iso8601
           }
         )
       end
@@ -412,7 +412,7 @@ module A2A
           controller: controller_name,
           action: action_name,
           rails_version: Rails.version,
-          created_at: Time.current.iso8601
+          created_at: Time.now.iso8601
         }
         
         base_metadata.merge(config[:metadata] || {})

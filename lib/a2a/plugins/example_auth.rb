@@ -43,7 +43,7 @@ class A2A::Plugins::ExampleAuth < A2A::Plugin::AuthPlugin
       logger&.debug("Example Auth: Validating request authentication")
 
       # Add request timestamp for security
-      request[:auth_timestamp] = Time.current.to_i
+      request[:auth_timestamp] = Time.now.to_i
     end
 
     plugin_manager.add_hook(A2A::Plugin::Events::REQUEST_ERROR) do |error, request|
@@ -68,7 +68,7 @@ class A2A::Plugins::ExampleAuth < A2A::Plugin::AuthPlugin
   def generate_token(options)
     # Simple token generation - in real implementation, use proper JWT or similar
     payload = {
-      timestamp: Time.current.to_i,
+      timestamp: Time.now.to_i,
       client_id: options[:client_id] || "unknown"
     }
 

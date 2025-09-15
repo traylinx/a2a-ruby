@@ -69,10 +69,10 @@ if defined?(ActiveRecord)
     record.assign_attributes(
       context_id: task.context_id,
       task_data: task_data,
-      updated_at: Time.current
+      updated_at: Time.now
     )
 
-    record.created_at = Time.current if record.new_record?
+    record.created_at = Time.now if record.new_record?
 
     record.save!
   end

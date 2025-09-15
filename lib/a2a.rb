@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative "a2a/modules"
 require_relative "a2a/version"
 require_relative "a2a/configuration"
 require_relative "a2a/errors"

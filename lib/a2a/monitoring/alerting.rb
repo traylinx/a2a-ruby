@@ -52,7 +52,7 @@ module A2A::Monitoring
         severity: severity,
         description: description || "Alert for #{metric}",
         tags: tags,
-        created_at: Time.zone.now,
+        created_at: Time.now,
         last_evaluated: nil,
         evaluation_count: 0
       }
@@ -109,7 +109,7 @@ module A2A::Monitoring
     #
     # @param max_age [Integer] Maximum age in seconds (default: 1 hour)
     def cleanup_resolved_alerts(max_age: 3600)
-      cutoff_time = Time.zone.now - max_age
+      cutoff_time = Time.now - max_age
 
       @mutex.synchronize do
         @active_alerts.reject! do |_, alert|
@@ -138,7 +138,7 @@ module A2A::Monitoring
     # @param rule [Hash] Alert rule
     # @param metrics [Hash] Current metrics
     def evaluate_rule(rule, metrics)
-      rule[:last_evaluated] = Time.zone.now
+      rule[:last_evaluated] = Time.now
       rule[:evaluation_count] += 1
 
       # Find matching metrics
@@ -249,7 +249,7 @@ module A2A::Monitoring
 
       # Don't fire if already active and within timeout
       if existing_alert && existing_alert[:state] == STATE_FIRING
-        time_since_fired = Time.zone.now - existing_alert[:fired_at]
+        time_since_fired = Time.now - existing_alert[:fired_at]
         return if time_since_fired < @config[:alert_timeout]
       end
 
@@ -263,7 +263,7 @@ module A2A::Monitoring
         description: rule[:description],
         tags: rule[:tags],
         state: STATE_FIRING,
-        fired_at: Time.zone.now,
+        fired_at: Time.now,
         resolved_at: nil
       }
 
@@ -280,7 +280,7 @@ module A2A::Monitoring
       return unless alert && alert[:state] == STATE_FIRING
 
       alert[:state] = STATE_RESOLVED
-      alert[:resolved_at] = Time.zone.now
+      alert[:resolved_at] = Time.now
 
       send_alert_notification(alert)
     end

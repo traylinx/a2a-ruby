@@ -9,7 +9,7 @@ require "json"
 # Provides comprehensive logging of A2A requests, responses, and errors
 # with configurable log levels and filtering.
 #
-class A2A::Client::Middleware::LoggingInterceptor < Base
+class A2A::Client::Middleware::LoggingInterceptor
   attr_reader :logger, :log_level, :log_requests, :log_responses, :log_errors
 
   ##
@@ -44,19 +44,19 @@ class A2A::Client::Middleware::LoggingInterceptor < Base
     request_id = context[:request_id] || generate_request_id
     context[:request_id] = request_id
 
-    start_time = Time.zone.now
+    start_time = Time.now
 
     log_request(request, context) if @log_requests
 
     begin
       response = next_middleware.call(request, context)
 
-      duration = Time.zone.now - start_time
+      duration = Time.now - start_time
       log_response(response, context, duration) if @log_responses
 
       response
     rescue StandardError => e
-      duration = Time.zone.now - start_time
+      duration = Time.now - start_time
       log_error(e, context, duration) if @log_errors
       raise e
     end

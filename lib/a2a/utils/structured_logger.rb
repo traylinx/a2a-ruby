@@ -39,7 +39,7 @@ class A2A::Utils::StructuredLogger
     @service_name = service_name
     @version = version
     @correlation_id = correlation_id || generate_correlation_id
-    @start_time = Time.zone.now
+    @start_time = Time.now
   end
 
   ##
@@ -225,7 +225,7 @@ class A2A::Utils::StructuredLogger
       service_name: @service_name,
       version: @version,
       correlation_id: @correlation_id,
-      uptime: Time.zone.now - @start_time,
+      uptime: Time.now - @start_time,
       log_level: @logger.level
     }
   end

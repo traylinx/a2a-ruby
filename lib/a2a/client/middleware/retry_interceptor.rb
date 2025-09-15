@@ -6,7 +6,7 @@
 # Automatically retries failed requests with configurable backoff
 # strategy and error filtering.
 #
-class A2A::Client::Middleware::RetryInterceptor < Base
+class A2A::Client::Middleware::RetryInterceptor
   attr_reader :max_attempts, :initial_delay, :max_delay, :backoff_multiplier, :retryable_errors
 
   # Default retryable error classes

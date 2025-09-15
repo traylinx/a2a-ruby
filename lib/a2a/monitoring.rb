@@ -5,6 +5,7 @@ require "json"
 require_relative "monitoring/metrics_collector"
 require_relative "monitoring/distributed_tracing"
 require_relative "monitoring/alerting"
+require_relative "monitoring/health_endpoints"
 
 ##
 # Monitoring and metrics collection for A2A SDK
@@ -78,13 +79,13 @@ module A2A::Monitoring
     # @yield Block to time
     # @return [Object] Block result
     def time(name, **labels)
-      start_time = Time.current
+      start_time = Time.now
       result = yield
-      duration = Time.current - start_time
+      duration = Time.now - start_time
       record_timing(name, duration, **labels)
       result
     rescue StandardError
-      duration = Time.current - start_time
+      duration = Time.now - start_time
       record_timing(name, duration, status: "error", **labels)
       raise
     end
@@ -122,7 +123,7 @@ module A2A::Monitoring
         name: name,
         value: value,
         labels: labels,
-        timestamp: Time.current.to_f
+        timestamp: Time.now.to_f
       }
 
       @mutex.synchronize do
@@ -207,7 +208,7 @@ module A2A::Monitoring
       correlation_id = current_correlation_id
 
       structured_data = {
-        timestamp: Time.current.iso8601,
+        timestamp: Time.now.iso8601,
         level: level.to_s.upcase,
         message: message,
         correlation_id: correlation_id,
@@ -287,7 +288,7 @@ module A2A::Monitoring
         results[name] = {
           status: status,
           message: result[:message],
-          timestamp: Time.current.iso8601
+          timestamp: Time.now.iso8601
         }
 
         overall_status = :unhealthy if status == :unhealthy
@@ -295,7 +296,7 @@ module A2A::Monitoring
         results[name] = {
           status: :error,
           message: e.message,
-          timestamp: Time.current.iso8601
+          timestamp: Time.now.iso8601
         }
         overall_status = :unhealthy
       end
@@ -303,7 +304,7 @@ module A2A::Monitoring
       {
         status: overall_status,
         checks: results,
-        timestamp: Time.current.iso8601
+        timestamp: Time.now.iso8601
       }
     end
 
@@ -385,7 +386,7 @@ module A2A::Monitoring
         metric_name: name,
         metric_value: value,
         metric_labels: labels,
-        timestamp: Time.current.iso8601
+        timestamp: Time.now.iso8601
       }
 
       @logger.info("METRIC: #{metric_data.to_json}")

@@ -84,7 +84,7 @@ class A2A::Client::Auth::ApiKey
   #
   # @return [String] Masked API key
   def masked_key
-    return "[empty]" if @key.blank?
+    return "[empty]" if @key.nil? || (respond_to?(:empty?) && empty?) || (is_a?(String) && strip.empty?)
     return @key if @key.length <= 8
 
     "#{@key[0..3]}#{"*" * (@key.length - 8)}#{@key[-4..]}"
@@ -137,9 +137,9 @@ class A2A::Client::Auth::ApiKey
   ##
   # Validate the authentication configuration
   def validate_configuration!
-    raise ArgumentError, "API key cannot be nil or empty" if @key.blank?
+    raise ArgumentError, "API key cannot be nil or empty" if @key.nil? || (respond_to?(:empty?) && empty?) || (is_a?(String) && strip.empty?)
     raise ArgumentError, "API key must be a string" unless @key.is_a?(String)
-    raise ArgumentError, "Name cannot be nil or empty" if @name.blank?
+    raise ArgumentError, "Name cannot be nil or empty" if @name.nil? || (respond_to?(:empty?) && empty?) || (is_a?(String) && strip.empty?)
 
     return if VALID_LOCATIONS.include?(@location)
 

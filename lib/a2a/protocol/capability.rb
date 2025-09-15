@@ -169,9 +169,9 @@ module A2A::Protocol
     private
 
     def validate!
-      raise ArgumentError, "name is required" if @name.blank?
-      raise ArgumentError, "description is required" if @description.blank?
-      raise ArgumentError, "method is required" if @method.blank?
+      raise ArgumentError, "name is required" if @name.nil? || (respond_to?(:empty?) && empty?) || (is_a?(String) && strip.empty?)
+      raise ArgumentError, "description is required" if @description.nil? || (respond_to?(:empty?) && empty?) || (is_a?(String) && strip.empty?)
+      raise ArgumentError, "method is required" if @method.nil? || (respond_to?(:empty?) && empty?) || (is_a?(String) && strip.empty?)
 
       raise ArgumentError, "name must be a String" unless @name.is_a?(String)
       raise ArgumentError, "description must be a String" unless @description.is_a?(String)

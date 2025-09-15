@@ -94,7 +94,7 @@ class A2A::Client::Auth::OAuth2
     return true unless @expires_at
 
     # Consider token expired if it expires within 30 seconds
-    Time.zone.now >= (@expires_at - 30)
+    Time.now >= (@expires_at - 30)
   end
 
   ##
@@ -131,7 +131,7 @@ class A2A::Client::Auth::OAuth2
 
     # Calculate expiration time
     expires_in = token_data["expires_in"]&.to_i || 3600 # Default to 1 hour
-    @expires_at = Time.zone.now + expires_in
+    @expires_at = Time.now + expires_in
 
     @access_token
   rescue Faraday::Error => e

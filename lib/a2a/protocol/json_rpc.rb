@@ -55,7 +55,7 @@ module A2A::Protocol
     # @raise [A2A::Errors::InvalidRequest] If request format is invalid
     def self.parse_request(json_string)
       # Performance optimization: early return for empty strings
-      return nil if json_string.blank?
+      return nil if json_string.nil? || (respond_to?(:empty?) && empty?) || (is_a?(String) && strip.empty?)
 
       begin
         # Use optimized JSON parser if available

@@ -372,7 +372,7 @@ module A2A::Transport
     def build_call_options
       {
         timeout: @config[:timeout],
-        deadline: Time.zone.now + @config[:deadline],
+        deadline: Time.now + @config[:deadline],
         metadata: @config[:metadata]
       }
     end

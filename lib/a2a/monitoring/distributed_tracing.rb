@@ -223,7 +223,7 @@ class A2A::Monitoring::DistributedTracing
       @trace_id = parent&.trace_id || generate_trace_id
       @span_id = generate_span_id
       @parent_span_id = parent&.span_id
-      @start_time = Time.zone.now
+      @start_time = Time.now
       @end_time = nil
       @attributes = attributes
       @events = []
@@ -256,7 +256,7 @@ class A2A::Monitoring::DistributedTracing
     # @param name [String] Event name
     # @param attributes [Hash] Event attributes
     # @param timestamp [Time] Event timestamp
-    def add_event(name, attributes: {}, timestamp: Time.zone.now)
+    def add_event(name, attributes: {}, timestamp: Time.now)
       @events << {
         name: name,
         attributes: attributes,
@@ -289,7 +289,7 @@ class A2A::Monitoring::DistributedTracing
     # Finish the span
     #
     def finish
-      @end_time = Time.zone.now
+      @end_time = Time.now
 
       # Clear from current context if this is the current span
       DistributedTracing.set_current_span(@parent) if DistributedTracing.current_span == self

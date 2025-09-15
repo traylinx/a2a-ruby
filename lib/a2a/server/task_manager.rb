@@ -90,7 +90,7 @@ class A2A::Server::TaskManager
   # @return [A2A::Types::Task] The task
   # @raise [A2A::Errors::TaskNotFound] If task doesn't exist
   def get_task(task_id, history_length: nil)
-    start_time = Time.zone.now
+    start_time = Time.now
 
     # Check cache first for frequently accessed tasks
     cached_task = get_from_cache(task_id)
@@ -120,7 +120,7 @@ class A2A::Server::TaskManager
     # Cache the task for future access
     add_to_cache(task_id, task)
 
-    record_processing_time(Time.zone.now - start_time)
+    record_processing_time(Time.now - start_time)
     task
   end
 
@@ -425,7 +425,7 @@ class A2A::Server::TaskManager
       return nil unless entry
 
       # Check TTL
-      if Time.zone.now - entry[:timestamp] > @config[:cache_ttl]
+      if Time.now - entry[:timestamp] > @config[:cache_ttl]
         @task_cache.delete(task_id)
         return nil
       end
@@ -449,7 +449,7 @@ class A2A::Server::TaskManager
 
       @task_cache[task_id] = {
         task: task,
-        timestamp: Time.zone.now
+        timestamp: Time.now
       }
     end
   end

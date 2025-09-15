@@ -35,8 +35,8 @@ class A2A::Monitoring::MetricsCollector
     @metrics = {}
     @flush_interval = flush_interval
     @retention_period = retention_period
-    @start_time = Time.zone.now
-    @last_flush = Time.zone.now
+    @start_time = Time.now
+    @last_flush = Time.now
     @exporters = []
     @alert_rules = []
 
@@ -53,7 +53,7 @@ class A2A::Monitoring::MetricsCollector
     synchronize do
       metric = get_or_create_metric(name, COUNTER, tags)
       metric[:value] += value
-      metric[:last_updated] = Time.zone.now
+      metric[:last_updated] = Time.now
 
       check_alerts(name, metric[:value], tags)
     end
@@ -69,7 +69,7 @@ class A2A::Monitoring::MetricsCollector
     synchronize do
       metric = get_or_create_metric(name, GAUGE, tags)
       metric[:value] = value
-      metric[:last_updated] = Time.zone.now
+      metric[:last_updated] = Time.now
 
       check_alerts(name, value, tags)
     end
@@ -87,7 +87,7 @@ class A2A::Monitoring::MetricsCollector
       metric[:values] << value
       metric[:count] += 1
       metric[:sum] += value
-      metric[:last_updated] = Time.zone.now
+      metric[:last_updated] = Time.now
 
       # Calculate percentiles
       update_histogram_stats(metric)
@@ -221,7 +221,7 @@ class A2A::Monitoring::MetricsCollector
     synchronize do
       {
         total_metrics: @metrics.size,
-        uptime: Time.zone.now - @start_time,
+        uptime: Time.now - @start_time,
         last_flush: @last_flush,
         exporters: @exporters.size,
         alert_rules: @alert_rules.size,
@@ -242,7 +242,7 @@ class A2A::Monitoring::MetricsCollector
       warn "Failed to export metrics: #{e.message}"
     end
 
-    synchronize { @last_flush = Time.zone.now }
+    synchronize { @last_flush = Time.now }
     cleanup_old_metrics
   end
 
@@ -252,8 +252,8 @@ class A2A::Monitoring::MetricsCollector
   def reset!
     synchronize do
       @metrics.clear
-      @start_time = Time.zone.now
-      @last_flush = Time.zone.now
+      @start_time = Time.now
+      @last_flush = Time.now
     end
   end
 
@@ -285,8 +285,8 @@ class A2A::Monitoring::MetricsCollector
       values: type == HISTOGRAM ? [] : nil,
       count: type == HISTOGRAM ? 0 : nil,
       sum: type == HISTOGRAM ? 0 : nil,
-      created_at: Time.zone.now,
-      last_updated: Time.zone.now
+      created_at: Time.now,
+      last_updated: Time.now
     }
   end
 
@@ -362,9 +362,9 @@ class A2A::Monitoring::MetricsCollector
                     else false
                     end
 
-      if should_fire && (rule[:last_fired].nil? || Time.zone.now - rule[:last_fired] > 60)
+      if should_fire && (rule[:last_fired].nil? || Time.now - rule[:last_fired] > 60)
         rule[:callback]&.call(rule[:name], metric_name, value, tags)
-        rule[:last_fired] = Time.zone.now
+        rule[:last_fired] = Time.now
       end
     end
   end
@@ -398,7 +398,7 @@ class A2A::Monitoring::MetricsCollector
   # Clean up old metrics
   #
   def cleanup_old_metrics
-    cutoff_time = Time.zone.now - @retention_period
+    cutoff_time = Time.now - @retention_period
 
     synchronize do
       @metrics.reject! do |_, metric|

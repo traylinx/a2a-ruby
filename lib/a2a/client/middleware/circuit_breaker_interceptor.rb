@@ -6,7 +6,7 @@
 # Implements the circuit breaker pattern to prevent cascading failures
 # by temporarily stopping requests to a failing service.
 #
-class A2A::Client::Middleware::CircuitBreakerInterceptor < Base
+class A2A::Client::Middleware::CircuitBreakerInterceptor
   # Circuit breaker states
   CLOSED = :closed
   OPEN = :open
@@ -112,7 +112,7 @@ class A2A::Client::Middleware::CircuitBreakerInterceptor < Base
   def trip!
     @mutex.synchronize do
       @state = OPEN
-      @last_failure_time = Time.zone.now
+      @last_failure_time = Time.now
     end
   end
 
@@ -160,7 +160,7 @@ class A2A::Client::Middleware::CircuitBreakerInterceptor < Base
   # Handle failed request
   def on_failure
     @failure_count += 1
-    @last_failure_time = Time.zone.now
+    @last_failure_time = Time.now
 
     return unless @failure_count >= @failure_threshold
 
@@ -183,7 +183,7 @@ class A2A::Client::Middleware::CircuitBreakerInterceptor < Base
   def on_half_open_failure
     @state = OPEN
     @failure_count += 1
-    @last_failure_time = Time.zone.now
+    @last_failure_time = Time.now
   end
 
   ##
@@ -191,7 +191,7 @@ class A2A::Client::Middleware::CircuitBreakerInterceptor < Base
   def timeout_expired?
     return false unless @last_failure_time
 
-    Time.zone.now - @last_failure_time >= @timeout
+    Time.now - @last_failure_time >= @timeout
   end
 
   ##
@@ -199,7 +199,7 @@ class A2A::Client::Middleware::CircuitBreakerInterceptor < Base
   def time_until_half_open
     return 0 unless @state == OPEN && @last_failure_time
 
-    elapsed = Time.zone.now - @last_failure_time
+    elapsed = Time.now - @last_failure_time
     remaining = @timeout - elapsed
     [remaining, 0].max
   end

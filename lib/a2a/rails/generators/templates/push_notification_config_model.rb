@@ -47,7 +47,7 @@ class <%= model_class_name("push_notification_config") %> < ApplicationRecord
 
   # Soft delete
   def soft_delete!
-    update!(deleted_at: Time.current, active: false)
+    update!(deleted_at: Time.now, active: false)
   end
 
   def deleted?
@@ -57,7 +57,7 @@ class <%= model_class_name("push_notification_config") %> < ApplicationRecord
   # Status management
   def mark_success!
     update!(
-      last_success_at: Time.current,
+      last_success_at: Time.now,
       last_failure_at: nil,
       last_error: nil,
       retry_count: 0
@@ -66,7 +66,7 @@ class <%= model_class_name("push_notification_config") %> < ApplicationRecord
 
   def mark_failure!(error_message)
     update!(
-      last_failure_at: Time.current,
+      last_failure_at: Time.now,
       last_error: error_message,
       retry_count: retry_count + 1,
       active: retry_count < self.class.max_retries

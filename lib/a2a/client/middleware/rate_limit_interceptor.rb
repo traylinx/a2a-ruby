@@ -6,7 +6,7 @@
 # Implements client-side rate limiting to prevent overwhelming
 # the target agent with too many requests.
 #
-class A2A::Client::Middleware::RateLimitInterceptor < Base
+class A2A::Client::Middleware::RateLimitInterceptor
   attr_reader :requests_per_second, :burst_size, :tokens, :last_refill
 
   ##
@@ -18,7 +18,7 @@ class A2A::Client::Middleware::RateLimitInterceptor < Base
     @requests_per_second = requests_per_second.to_f
     @burst_size = burst_size
     @tokens = @burst_size.to_f
-    @last_refill = Time.zone.now
+    @last_refill = Time.now
     @mutex = Mutex.new
 
     validate_configuration!
@@ -83,7 +83,7 @@ class A2A::Client::Middleware::RateLimitInterceptor < Base
   def reset!
     @mutex.synchronize do
       @tokens = @burst_size.to_f
-      @last_refill = Time.zone.now
+      @last_refill = Time.now
     end
   end
 
@@ -111,7 +111,7 @@ class A2A::Client::Middleware::RateLimitInterceptor < Base
   ##
   # Refill tokens based on elapsed time
   def refill_tokens
-    now = Time.zone.now
+    now = Time.now
     elapsed = now - @last_refill
 
     return unless elapsed.positive?

@@ -97,7 +97,7 @@ class A2A::Client::Auth::JWT
 
     if @generated_token && @token_expires_at
       # Check generated token expiration
-      Time.zone.now >= (@token_expires_at - 30) # 30 second buffer
+      Time.now >= (@token_expires_at - 30) # 30 second buffer
     elsif token || @token
       # Check token payload expiration
       begin
@@ -172,7 +172,7 @@ class A2A::Client::Auth::JWT
       now = Time.now.to_i
       token_payload["iat"] = now
       token_payload["exp"] = now + @expires_in
-      @token_expires_at = Time.zone.now + @expires_in
+      @token_expires_at = Time.now + @expires_in
     end
 
     # Generate token

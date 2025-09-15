@@ -241,7 +241,7 @@ module A2A::Plugin
   ##
   # Transport plugin interface
   #
-  class TransportPlugin < Base
+  class TransportPlugin < A2A::Plugin::Base
     plugin_type :transport
 
     # Send a request (must be implemented by subclasses)
@@ -269,7 +269,7 @@ module A2A::Plugin
   ##
   # Authentication plugin interface
   #
-  class AuthPlugin < Base
+  class AuthPlugin < A2A::Plugin::Base
     plugin_type :auth
 
     # Authenticate a request (must be implemented by subclasses)
@@ -291,7 +291,7 @@ module A2A::Plugin
   ##
   # Middleware plugin interface
   #
-  class MiddlewarePlugin < Base
+  class MiddlewarePlugin < A2A::Plugin::Base
     plugin_type :middleware
 
     # Process request (must be implemented by subclasses)

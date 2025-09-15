@@ -431,7 +431,7 @@ module A2A::Transport
       @data = data
       @id = id
       @retry = retry_interval
-      @timestamp = Time.zone.now
+      @timestamp = Time.now
     end
 
     ##

@@ -157,7 +157,7 @@ class A2A::Rails::Generators::InstallGenerator < Rails::Generators::Base
   end
 
   def migration_timestamp
-    Time.current.strftime("%Y%m%d%H%M%S")
+    Time.now.strftime("%Y%m%d%H%M%S")
   end
 
   def authentication_strategy

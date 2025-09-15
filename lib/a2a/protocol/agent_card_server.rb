@@ -393,7 +393,7 @@ module A2A::Protocol
       return nil unless timestamp
 
       # Check if cache entry is still valid
-      if Time.zone.now - timestamp < @config.cache_ttl
+      if Time.now - timestamp < @config.cache_ttl
         @cache[cache_key]
       else
         # Remove expired entry
@@ -410,7 +410,7 @@ module A2A::Protocol
     # @param card [A2A::Types::AgentCard] The card to cache
     def store_in_cache(cache_key, card)
       @cache[cache_key] = card
-      @cache_timestamps[cache_key] = Time.zone.now
+      @cache_timestamps[cache_key] = Time.now
     end
 
     ##

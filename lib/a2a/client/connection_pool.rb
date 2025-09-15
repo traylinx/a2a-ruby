@@ -37,7 +37,7 @@ module A2A::Client
       @pool = []
       @checked_out = []
       @created = 0
-      @last_cleanup = Time.zone.now
+      @last_cleanup = Time.now
     end
 
     ##
@@ -55,9 +55,9 @@ module A2A::Client
 
         # Wait for a connection to become available
         if connection.nil?
-          deadline = Time.zone.now + @timeout
+          deadline = Time.now + @timeout
 
-          while connection.nil? && Time.zone.now < deadline
+          while connection.nil? && Time.now < deadline
             ns_wait(0.1) # Wait 100ms
             connection = @pool.pop
           end
@@ -85,7 +85,7 @@ module A2A::Client
 
         # Add connection back to pool if it's still valid
         if valid_connection?(connection)
-          connection.instance_variable_set(:@last_used, Time.zone.now)
+          connection.instance_variable_set(:@last_used, Time.now)
           @pool.push(connection)
         else
           # Connection is invalid, create a new one to replace it
@@ -159,8 +159,8 @@ module A2A::Client
       return nil unless @connection_factory
 
       connection = @connection_factory.call
-      connection.instance_variable_set(:@created_at, Time.zone.now)
-      connection.instance_variable_set(:@last_used, Time.zone.now)
+      connection.instance_variable_set(:@created_at, Time.now)
+      connection.instance_variable_set(:@last_used, Time.now)
       @created += 1
 
       connection
@@ -179,7 +179,7 @@ module A2A::Client
 
       # Check if connection is not too old
       created_at = connection.instance_variable_get(:@created_at)
-      return false if created_at && (Time.zone.now - created_at) > (@idle_timeout * 10)
+      return false if created_at && (Time.now - created_at) > (@idle_timeout * 10)
 
       true
     rescue StandardError
@@ -201,15 +201,15 @@ module A2A::Client
     #
     # @return [Boolean] True if cleanup should run
     def should_cleanup?
-      Time.zone.now - @last_cleanup > 60 # Cleanup every minute
+      Time.now - @last_cleanup > 60 # Cleanup every minute
     end
 
     ##
     # Clean up idle connections
     #
     def cleanup_idle_connections
-      @last_cleanup = Time.zone.now
-      cutoff_time = Time.zone.now - @idle_timeout
+      @last_cleanup = Time.now
+      cutoff_time = Time.now - @idle_timeout
 
       @pool.reject! do |connection|
         last_used = connection.instance_variable_get(:@last_used)

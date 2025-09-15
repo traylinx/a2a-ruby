@@ -156,7 +156,7 @@ class A2A::Server::PushNotificationManager
   # @return [void]
   def process_retry_queue
     @mutex.synchronize do
-      current_time = Time.zone.now
+      current_time = Time.now
 
       @retry_queue.select! do |retry_item|
         if current_time >= retry_item[:next_retry_at]
@@ -304,7 +304,7 @@ class A2A::Server::PushNotificationManager
     # Add jitter to prevent thundering herd
     jitter = rand(0.1 * delay)
 
-    Time.zone.now + delay + jitter
+    Time.now + delay + jitter
   end
 
   ##

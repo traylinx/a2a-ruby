@@ -61,10 +61,10 @@ class A2A::Utils::Performance
     # Take a memory snapshot
     #
     # @param label [String] Label for the snapshot
-    def memory_snapshot(label = Time.zone.now.to_s)
+    def memory_snapshot(label = Time.now.to_s)
       snapshot = {
         label: label,
-        timestamp: Time.zone.now,
+        timestamp: Time.now,
         memory: memory_usage,
         gc_stats: defined?(GC.stat) ? GC.stat : {}
       }

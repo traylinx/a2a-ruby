@@ -86,7 +86,7 @@ class ExampleAgentController < ApplicationController
       message: message,
       name: name,
       style: style,
-      timestamp: Time.current.iso8601
+      timestamp: Time.now.iso8601
     }
   end
 
@@ -103,7 +103,7 @@ class ExampleAgentController < ApplicationController
     {
       echo: message,
       length: message.length,
-      timestamp: Time.current.iso8601,
+      timestamp: Time.now.iso8601,
       agent: "ExampleAgent"
     }
   end
@@ -121,7 +121,7 @@ class ExampleAgentController < ApplicationController
     timezone = params[:timezone] || "UTC"
     
     begin
-      time = Time.current.in_time_zone(timezone)
+      time = Time.now.in_time_zone(timezone)
       
       formatted_time = case format
                       when "unix"
@@ -158,7 +158,7 @@ class ExampleAgentController < ApplicationController
       message: message,
       user: current_user_info,
       permissions: current_user_permissions,
-      authenticated_at: Time.current.iso8601,
+      authenticated_at: Time.now.iso8601,
       security_level: "authenticated"
     }
   end
@@ -174,12 +174,12 @@ class ExampleAgentController < ApplicationController
     {
       status: "healthy",
       version: "1.0.0",
-      uptime: Time.current - Rails.application.config.booted_at,
+      uptime: Time.now - Rails.application.config.booted_at,
       rails_version: Rails.version,
       a2a_version: A2A::VERSION,
       capabilities: self.class._a2a_capabilities&.map(&:name) || [],
       methods: self.class._a2a_methods&.keys || [],
-      timestamp: Time.current.iso8601
+      timestamp: Time.now.iso8601
     }
   end
 

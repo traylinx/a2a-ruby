@@ -17,7 +17,7 @@ class A2A::Plugins::ExampleMiddleware < A2A::Plugin::MiddlewarePlugin
   # @param next_middleware [Proc] Next middleware in chain
   # @return [Object] Response
   def call(request, next_middleware)
-    start_time = Time.current
+    start_time = Time.now
 
     logger&.info("Example Middleware: Processing request #{request[:id]}")
 
@@ -32,13 +32,13 @@ class A2A::Plugins::ExampleMiddleware < A2A::Plugin::MiddlewarePlugin
       response = postprocess_response(response, request)
 
       # Log success
-      duration = Time.current - start_time
+      duration = Time.now - start_time
       logger&.info("Example Middleware: Request completed in #{duration.round(3)}s")
 
       response
     rescue StandardError => e
       # Error handling
-      duration = Time.current - start_time
+      duration = Time.now - start_time
       logger&.error("Example Middleware: Request failed after #{duration.round(3)}s: #{e.message}")
 
       # Execute error hooks
@@ -54,7 +54,7 @@ class A2A::Plugins::ExampleMiddleware < A2A::Plugin::MiddlewarePlugin
       logger&.debug("Example Middleware: Adding request metadata")
       request[:middleware_metadata] ||= {}
       request[:middleware_metadata][:example] = {
-        processed_at: Time.current.iso8601,
+        processed_at: Time.now.iso8601,
         version: "1.0.0"
       }
     end
@@ -80,7 +80,7 @@ class A2A::Plugins::ExampleMiddleware < A2A::Plugin::MiddlewarePlugin
 
     # Add processing metadata
     request[:processing] ||= {}
-    request[:processing][:middleware_start] = Time.current.to_f
+    request[:processing][:middleware_start] = Time.now.to_f
 
     # Validate request structure
     validate_request_structure(request)
@@ -91,7 +91,7 @@ class A2A::Plugins::ExampleMiddleware < A2A::Plugin::MiddlewarePlugin
   def postprocess_response(response, request)
     # Add processing time to response metadata
     if request[:processing] && request[:processing][:middleware_start]
-      processing_time = Time.current.to_f - request[:processing][:middleware_start]
+      processing_time = Time.now.to_f - request[:processing][:middleware_start]
 
       if response.is_a?(Hash)
         response[:metadata] ||= {}

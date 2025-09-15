@@ -53,7 +53,7 @@ module A2A::Monitoring
 
       response = {
         status: ready ? "ready" : "not_ready",
-        timestamp: Time.current.iso8601
+        timestamp: Time.now.iso8601
       }
 
       [status_code, json_headers, [response.to_json]]
@@ -64,7 +64,7 @@ module A2A::Monitoring
       # Simple liveness check - if we can respond, we're alive
       response = {
         status: "alive",
-        timestamp: Time.current.iso8601,
+        timestamp: Time.now.iso8601,
         uptime: Process.clock_gettime(Process::CLOCK_MONOTONIC)
       }
 

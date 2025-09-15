@@ -55,7 +55,7 @@ class <%= controller_class_name %> < <%= controller_parent_class %>
       action: "process",
       params: params,
       result: "Processing completed",
-      timestamp: Time.current.iso8601
+      timestamp: Time.now.iso8601
     }
   end
   <% end %>
@@ -73,7 +73,7 @@ class <%= controller_class_name %> < <%= controller_parent_class %>
       version: "1.0.0",
       capabilities: self.class._a2a_capabilities&.map(&:name) || [],
       methods: self.class._a2a_methods&.keys || [],
-      timestamp: Time.current.iso8601
+      timestamp: Time.now.iso8601
     }
   end
 
