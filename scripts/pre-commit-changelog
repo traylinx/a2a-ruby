@@ -1,0 +1,15 @@
+#!/bin/bash
+# Pre-commit hook to automatically update changelog dates
+# To install: ln -s ../../scripts/pre-commit-changelog .git/hooks/pre-commit
+
+set -e
+
+# Check if CHANGELOG.md is being committed
+if git diff --cached --name-only | grep -q "CHANGELOG.md"; then
+    echo "Updating CHANGELOG.md dates..."
+    ruby scripts/update_changelog_date.rb
+    
+    # Add the updated changelog back to the commit
+    git add CHANGELOG.md
+    echo "CHANGELOG.md dates updated automatically"
+fi

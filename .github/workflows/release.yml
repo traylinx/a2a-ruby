@@ -19,6 +19,13 @@ jobs:
         ruby-version: '3.2'
         bundler-cache: true
 
+    - name: Extract version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Update changelog with current date
+      run: ruby scripts/update_changelog_date.rb ${{ steps.version.outputs.VERSION }}
+
     - name: Run full test suite
       run: bundle exec rake ci
       env:
