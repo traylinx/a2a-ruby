@@ -49,14 +49,6 @@ jobs:
       env:
         REDIS_URL: redis://localhost:6379/0
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage/lcov.info
-        token: ${{ secrets.CODECOV_TOKEN }}
-        fail_ci_if_error: false
-      continue-on-error: true
-
   security:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
