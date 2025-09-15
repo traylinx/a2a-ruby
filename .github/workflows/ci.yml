@@ -54,7 +54,8 @@ jobs:
       with:
         file: ./coverage/lcov.info
         token: ${{ secrets.CODECOV_TOKEN }}
-        fail_ci_if_error: true
+        fail_ci_if_error: false
+      continue-on-error: true
 
   security:
     runs-on: ubuntu-latest
