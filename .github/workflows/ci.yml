@@ -49,23 +49,8 @@ jobs:
     - name: Run linting
       run: bundle exec rake rubocop
 
-    - name: Run unit tests
-      run: bundle exec rake spec:unit
-      env:
-        REDIS_URL: redis://localhost:6379/0
-
-    - name: Run integration tests
-      run: bundle exec rake spec:integration
-      env:
-        REDIS_URL: redis://localhost:6379/0
-
-    - name: Run compliance tests
-      run: bundle exec rake spec:compliance
-      env:
-        REDIS_URL: redis://localhost:6379/0
-
-    - name: Generate coverage report
-      run: bundle exec rake spec:coverage
+    - name: Run tests
+      run: bundle exec rake spec
       env:
         REDIS_URL: redis://localhost:6379/0
 

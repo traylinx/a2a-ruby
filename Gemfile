@@ -19,7 +19,6 @@ end
 group :test do
   gem "factory_bot", "~> 6.0"
   gem "rspec", "~> 3.12"
-  gem "rspec-rails", "~> 6.0"
   gem "simplecov", "~> 0.22"
   gem "simplecov-lcov", "~> 0.8"
   gem "vcr", "~> 6.0"
@@ -33,7 +32,6 @@ end
 group :development do
   gem "rubocop", "~> 1.57"
   gem "rubocop-performance", "~> 1.19"
-  gem "rubocop-rails", "~> 2.22"
   gem "rubocop-rspec", "~> 2.25"
 
   gem "guard", "~> 2.18"
@@ -42,9 +40,4 @@ group :development do
 
   # Security auditing
   gem "bundler-audit", "~> 0.9"
-
-  # Type checking (optional)
-  gem "sorbet", "~> 0.5", require: false
-  gem "sorbet-runtime", "~> 0.5"
-  gem "tapioca", "~> 0.11", require: false
 end

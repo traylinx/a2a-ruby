@@ -8,6 +8,34 @@ RSpec::Core::RakeTask.new(:spec) do |task|
   task.rspec_opts = "--format documentation --color"
 end
 
+# Specific test suites
+namespace :spec do
+  RSpec::Core::RakeTask.new(:unit) do |task|
+    task.pattern = "spec/a2a/**/*_spec.rb"
+    task.rspec_opts = "--format documentation --color"
+  end
+
+  RSpec::Core::RakeTask.new(:integration) do |task|
+    task.pattern = "spec/integration/**/*_spec.rb"
+    task.rspec_opts = "--format documentation --color"
+  end
+
+  RSpec::Core::RakeTask.new(:compliance) do |task|
+    task.pattern = "spec/compliance/**/*_spec.rb"
+    task.rspec_opts = "--format documentation --color"
+  end
+
+  RSpec::Core::RakeTask.new(:performance) do |task|
+    task.pattern = "spec/performance/**/*_spec.rb"
+    task.rspec_opts = "--format documentation --color"
+  end
+
+  desc "Run all tests with coverage"
+  RSpec::Core::RakeTask.new(:coverage) do |task|
+    task.rspec_opts = "--format documentation --color"
+  end
+end
+
 # Load optional tasks if gems are available
 begin
   require "rubocop/rake_task"
@@ -32,6 +60,10 @@ begin
 rescue LoadError
   # YARD not available
 end
+
+# CI task that runs all tests
+desc "Run all tests for CI"
+task ci: %w[rubocop spec:unit spec:integration spec:compliance]
 
 # Default task
 task default: :spec
