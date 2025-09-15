@@ -46,17 +46,18 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  # Core runtime dependencies
+  # Core runtime dependencies - minimal and compatible
+  spec.add_dependency "activesupport", ">= 6.0", "< 8.0"
   spec.add_dependency "concurrent-ruby", "~> 1.0"
   spec.add_dependency "faraday", "~> 2.0"
-  spec.add_dependency "faraday-multipart", "~> 1.0"
   spec.add_dependency "jwt", "~> 2.0"
+  spec.add_dependency "rack", ">= 2.0", "< 4.0"
 
   # Optional dependencies for enhanced functionality
   spec.add_dependency "redis", ">= 4.0", "< 6.0"
 
-  # Rails integration (optional)
-  spec.add_dependency "railties", ">= 6.0", "< 8.0"
+  # Web server support
+  spec.add_dependency "puma", ">= 5.0", "< 7.0"
 
   # Development dependencies
   spec.add_development_dependency "rspec", "~> 3.12"

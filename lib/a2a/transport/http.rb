@@ -1,9 +1,16 @@
 # frozen_string_literal: true
 
 require "faraday"
-require "faraday/multipart"
 require "json"
 require "concurrent"
+
+# Try to load multipart support - graceful degradation if not available
+begin
+  require "faraday/multipart"
+  MULTIPART_AVAILABLE = true
+rescue LoadError
+  MULTIPART_AVAILABLE = false
+end
 
 module A2A
   module Transport
@@ -267,7 +274,7 @@ module A2A
         Faraday.new(@base_url) do |conn|
           # Request/response middleware
           conn.request :json
-          conn.request :multipart
+          conn.request :multipart if MULTIPART_AVAILABLE
           conn.request :url_encoded
 
           # NOTE: Retry middleware requires faraday-retry gem

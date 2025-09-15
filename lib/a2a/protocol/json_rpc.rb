@@ -5,13 +5,9 @@ require "json"
 # Try to use Oj for faster JSON parsing if available
 begin
   require "oj"
-  JSON_PARSER = Oj
-  JSON_PARSE_OPTIONS = { mode: :strict, symbol_keys: false }.freeze
-  JSON_GENERATE_OPTIONS = { mode: :compat }.freeze
+  OJ_AVAILABLE = true
 rescue LoadError
-  JSON_PARSER = JSON
-  JSON_PARSE_OPTIONS = {}.freeze
-  JSON_GENERATE_OPTIONS = {}.freeze
+  OJ_AVAILABLE = false
 end
 
 module A2A
@@ -48,6 +44,32 @@ module A2A
       RESOURCE_EXHAUSTED = -32_010
 
       ##
+      # Parse JSON string using optimized parser if available
+      #
+      # @param json_string [String] JSON string to parse
+      # @return [Hash, Array] Parsed JSON data
+      def self.parse_json(json_string)
+        if OJ_AVAILABLE
+          Oj.load(json_string, mode: :strict, symbol_keys: false)
+        else
+          JSON.parse(json_string)
+        end
+      end
+
+      ##
+      # Generate JSON string using optimized generator if available
+      #
+      # @param object [Object] Object to serialize
+      # @return [String] JSON string
+      def self.generate_json(object)
+        if OJ_AVAILABLE
+          Oj.dump(object, mode: :compat)
+        else
+          JSON.generate(object)
+        end
+      end
+
+      ##
       # Parse a JSON-RPC 2.0 request from JSON string
       #
       # @param json_string [String] The JSON string to parse
@@ -56,11 +78,14 @@ module A2A
       # @raise [A2A::Errors::InvalidRequest] If request format is invalid
       def self.parse_request(json_string)
         # Performance optimization: early return for empty strings
-        return nil if json_string.nil? || (respond_to?(:empty?) && empty?) || (is_a?(String) && strip.empty?)
+        return nil if json_string.nil? || (json_string.respond_to?(:empty?) && json_string.empty?)
+
+        # Ensure we have a string
+        json_string = json_string.to_s unless json_string.is_a?(String)
 
         begin
           # Use optimized JSON parser if available
-          parsed = JSON_PARSER.parse(json_string, **JSON_PARSE_OPTIONS)
+          parsed = parse_json(json_string)
         rescue JSON::ParserError, Oj::ParseError => e
           raise A2A::Errors::ParseError, "Invalid JSON: #{e.message}"
         end
@@ -210,7 +235,7 @@ module A2A
           method: @method
         }
 
-        hash[:params] = @params unless @params.empty?
+        hash[:params] = @params unless @params.nil? || (@params.respond_to?(:empty?) && @params.empty?)
         hash[:id] = @id unless @id.nil?
 
         hash
@@ -220,13 +245,9 @@ module A2A
       # Convert to JSON string
       #
       # @return [String] The request as JSON
-      def to_json(*args)
+      def to_json(*_args)
         # Use optimized JSON generator if available
-        if defined?(JSON_PARSER) && JSON_PARSER == Oj
-          Oj.dump(to_h, **JSON_GENERATE_OPTIONS)
-        else
-          to_h.to_json(*args)
-        end
+        JsonRpc.generate_json(to_h)
       end
     end
   end

@@ -112,18 +112,12 @@ module A2A
           body = request.body.read
           request.body.rewind
 
+          # Parse JSON-RPC request directly from string
           begin
-            json_data = JSON.parse(body)
-          rescue JSON::ParserError => e
-            return json_rpc_error_response(nil, A2A::Protocol::JsonRpc::PARSE_ERROR, "Parse error: #{e.message}")
-          end
-
-          # Validate JSON-RPC structure
-          begin
-            rpc_request = A2A::Protocol::JsonRpc.parse_request(json_data)
+            rpc_request = A2A::Protocol::JsonRpc.parse_request(body)
           rescue A2A::Errors::A2AError => e
             return json_rpc_error_response(
-              json_data["id"],
+              nil, # No ID available if parsing failed
               e.code,
               e.message,
               e.data
