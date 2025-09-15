@@ -6,7 +6,7 @@
 #
 module A2AFixtureGenerators
   # Agent card fixtures
-  
+
   # Generate a comprehensive agent card with all optional fields
   def generate_full_agent_card(**overrides)
     {
@@ -16,13 +16,13 @@ module A2AFixtureGenerators
       url: "https://advanced-agent.example.com/a2a",
       preferredTransport: "JSONRPC",
       protocolVersion: "0.3.0",
-      
+
       skills: [
         {
           id: "text_processing",
           name: "Text Processing",
           description: "Advanced text analysis and processing capabilities",
-          tags: ["nlp", "text", "analysis"],
+          tags: %w[nlp text analysis],
           examples: [
             "Analyze the sentiment of this text",
             "Summarize this document",
@@ -30,13 +30,13 @@ module A2AFixtureGenerators
           ],
           inputModes: ["text/plain", "text/markdown", "application/json"],
           outputModes: ["text/plain", "application/json"],
-          security: [{ "oauth2" => ["read", "write"] }]
+          security: [{ "oauth2" => %w[read write] }]
         },
         {
           id: "file_processing",
           name: "File Processing",
           description: "Process and analyze various file formats",
-          tags: ["files", "processing", "conversion"],
+          tags: %w[files processing conversion],
           examples: [
             "Convert PDF to text",
             "Extract metadata from images",
@@ -47,17 +47,17 @@ module A2AFixtureGenerators
           security: [{ "apiKey" => [] }]
         }
       ],
-      
+
       capabilities: {
         streaming: true,
         pushNotifications: true,
         stateTransitionHistory: true,
         extensions: ["https://example.com/extensions/timestamp/v1"]
       },
-      
+
       defaultInputModes: ["text/plain", "application/json"],
       defaultOutputModes: ["text/plain", "application/json"],
-      
+
       additionalInterfaces: [
         {
           transport: "GRPC",
@@ -68,12 +68,12 @@ module A2AFixtureGenerators
           url: "https://advanced-agent.example.com/rest"
         }
       ],
-      
+
       security: [
-        { "oauth2" => ["read", "write", "admin"] },
+        { "oauth2" => %w[read write admin] },
         { "apiKey" => [] }
       ],
-      
+
       securitySchemes: {
         "oauth2" => {
           type: "oauth2",
@@ -102,15 +102,15 @@ module A2AFixtureGenerators
           in: "header"
         }
       },
-      
+
       provider: {
         name: "Example Corp",
         url: "https://example.com",
         email: "support@example.com"
       },
-      
+
       supportsAuthenticatedExtendedCard: true,
-      
+
       signatures: [
         {
           keyId: "key-1",
@@ -118,10 +118,10 @@ module A2AFixtureGenerators
           signature: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
         }
       ],
-      
+
       documentationUrl: "https://docs.example.com/agent-api",
       iconUrl: "https://example.com/icons/agent.png",
-      
+
       metadata: {
         createdAt: "2024-01-01T00:00:00Z",
         updatedAt: Time.current.iso8601,
@@ -147,7 +147,7 @@ module A2AFixtureGenerators
   end
 
   # Message fixtures
-  
+
   # Generate a complex message with multiple parts
   def generate_complex_message(**overrides)
     {
@@ -156,7 +156,7 @@ module A2AFixtureGenerators
       kind: "message",
       contextId: test_uuid,
       taskId: test_uuid,
-      
+
       parts: [
         {
           kind: "text",
@@ -203,14 +203,14 @@ module A2AFixtureGenerators
           }
         }
       ],
-      
+
       metadata: {
         priority: "high",
         timeout: 300,
         clientVersion: "1.2.3",
         userAgent: "TestClient/1.0"
       },
-      
+
       extensions: [
         {
           uri: "https://example.com/extensions/timestamp/v1",
@@ -220,7 +220,7 @@ module A2AFixtureGenerators
           }
         }
       ],
-      
+
       referenceTaskIds: [test_uuid, test_uuid]
     }.deep_merge(overrides)
   end
@@ -265,17 +265,17 @@ module A2AFixtureGenerators
   end
 
   # Task fixtures
-  
+
   # Generate a comprehensive task with full lifecycle
   def generate_comprehensive_task(**overrides)
     task_id = test_uuid
     context_id = test_uuid
-    
+
     {
       id: task_id,
       contextId: context_id,
       kind: "task",
-      
+
       status: {
         state: "completed",
         message: "Task completed successfully",
@@ -287,7 +287,7 @@ module A2AFixtureGenerators
         },
         updatedAt: Time.current.iso8601
       },
-      
+
       artifacts: [
         {
           artifactId: test_uuid,
@@ -306,7 +306,7 @@ module A2AFixtureGenerators
                 bytes: Base64.encode64({
                   analysis: {
                     totalItems: 150,
-                    categories: ["financial", "operational", "strategic"],
+                    categories: %w[financial operational strategic],
                     confidence: 0.95
                   }
                 }.to_json)
@@ -331,7 +331,7 @@ module A2AFixtureGenerators
           ]
         }
       ],
-      
+
       history: [
         generate_complex_message(
           role: "user",
@@ -350,9 +350,9 @@ module A2AFixtureGenerators
           metadata: { timestamp: Time.current.iso8601 }
         }
       ],
-      
+
       metadata: {
-        createdAt: (Time.current - 1.hour).iso8601,
+        createdAt: 1.hour.ago.iso8601,
         updatedAt: Time.current.iso8601,
         priority: "high",
         estimatedDuration: 60,
@@ -368,8 +368,8 @@ module A2AFixtureGenerators
 
   # Generate task status update events for streaming
   def generate_task_status_events(task_id:, context_id:)
-    states = ["submitted", "working", "completed"]
-    
+    states = %w[submitted working completed]
+
     states.map.with_index do |state, index|
       {
         taskId: task_id,
@@ -391,7 +391,7 @@ module A2AFixtureGenerators
   # Generate task artifact update events
   def generate_artifact_update_events(task_id:, context_id:, artifact_id: nil)
     artifact_id ||= test_uuid
-    
+
     [
       {
         taskId: task_id,
@@ -438,7 +438,7 @@ module A2AFixtureGenerators
   end
 
   # Push notification fixtures
-  
+
   # Generate push notification configurations
   def generate_push_notification_configs(count: 3)
     (1..count).map do |i|
@@ -463,57 +463,57 @@ module A2AFixtureGenerators
   end
 
   # Error fixtures
-  
+
   # Generate various JSON-RPC error responses
   def generate_json_rpc_errors
     {
       parse_error: {
         jsonrpc: "2.0",
         error: {
-          code: -32700,
+          code: -32_700,
           message: "Parse error",
           data: "Invalid JSON was received by the server"
         },
         id: nil
       },
-      
+
       invalid_request: {
         jsonrpc: "2.0",
         error: {
-          code: -32600,
+          code: -32_600,
           message: "Invalid Request",
           data: "The JSON sent is not a valid Request object"
         },
         id: nil
       },
-      
+
       method_not_found: {
         jsonrpc: "2.0",
         error: {
-          code: -32601,
+          code: -32_601,
           message: "Method not found",
           data: "The method does not exist / is not available"
         },
         id: 1
       },
-      
+
       task_not_found: {
         jsonrpc: "2.0",
         error: {
-          code: -32001,
+          code: -32_001,
           message: "Task not found",
           data: { taskId: test_uuid }
         },
         id: 1
       },
-      
+
       authentication_required: {
         jsonrpc: "2.0",
         error: {
-          code: -32004,
+          code: -32_004,
           message: "Authentication required",
           data: {
-            supportedSchemes: ["Bearer", "ApiKey"],
+            supportedSchemes: %w[Bearer ApiKey],
             authUrl: "https://auth.example.com"
           }
         },
@@ -523,7 +523,7 @@ module A2AFixtureGenerators
   end
 
   # Performance test fixtures
-  
+
   # Generate load test scenarios
   def generate_load_test_scenarios
     {
@@ -533,21 +533,21 @@ module A2AFixtureGenerators
         request_rate: 5, # requests per second per user
         message_size: :small
       },
-      
+
       medium_load: {
         concurrent_users: 50,
         duration: 2.minutes,
         request_rate: 10,
         message_size: :medium
       },
-      
+
       heavy_load: {
         concurrent_users: 100,
         duration: 5.minutes,
         request_rate: 20,
         message_size: :large
       },
-      
+
       stress_test: {
         concurrent_users: 200,
         duration: 10.minutes,
@@ -560,7 +560,7 @@ module A2AFixtureGenerators
   # Generate messages of different sizes for performance testing
   def generate_sized_message(size: :medium)
     base_text = "This is a test message for performance testing. "
-    
+
     text_content = case size
                    when :small
                      base_text * 10 # ~500 chars
@@ -590,7 +590,7 @@ module A2AFixtureGenerators
   end
 
   # Compliance test fixtures
-  
+
   # Generate test cases for protocol compliance
   def generate_compliance_test_cases
     {
@@ -599,21 +599,21 @@ module A2AFixtureGenerators
         build_json_rpc_request("tasks/get", { id: test_uuid }),
         build_json_rpc_request("agent/getCard", {})
       ],
-      
+
       invalid_requests: [
         { jsonrpc: "1.0", method: "test" }, # Wrong version
         { jsonrpc: "2.0" }, # Missing method
         { jsonrpc: "2.0", method: 123 }, # Invalid method type
         { jsonrpc: "2.0", method: "test", params: "invalid" } # Invalid params
       ],
-      
+
       batch_requests: [
         [
           build_json_rpc_request("message/send", { message: build_message }, 1),
           build_json_rpc_request("tasks/get", { id: test_uuid }, 2)
         ]
       ],
-      
+
       notifications: [
         { jsonrpc: "2.0", method: "notification/test", params: {} }
       ]
@@ -621,22 +621,22 @@ module A2AFixtureGenerators
   end
 
   # File helpers for fixture management
-  
+
   # Save generated fixtures to files
   def save_fixtures_to_files(fixtures_dir: "spec/fixtures/generated")
     FileUtils.mkdir_p(fixtures_dir)
-    
+
     fixtures = {
       "agent_cards.json" => {
         full: generate_full_agent_card,
         minimal: generate_minimal_agent_card
       },
-      
+
       "messages.json" => {
         complex: generate_complex_message,
         streaming: generate_streaming_message_response
       },
-      
+
       "tasks.json" => {
         comprehensive: generate_comprehensive_task,
         status_events: generate_task_status_events(
@@ -644,33 +644,33 @@ module A2AFixtureGenerators
           context_id: test_uuid
         )
       },
-      
+
       "errors.json" => generate_json_rpc_errors,
-      
+
       "compliance_cases.json" => generate_compliance_test_cases,
-      
+
       "load_scenarios.json" => generate_load_test_scenarios
     }
-    
+
     fixtures.each do |filename, data|
       File.write(
         File.join(fixtures_dir, filename),
         JSON.pretty_generate(data)
       )
     end
-    
+
     puts "Generated fixtures saved to #{fixtures_dir}"
   end
 
   # Load fixtures from files
   def load_fixtures_from_files(fixtures_dir: "spec/fixtures/generated")
     fixtures = {}
-    
+
     Dir.glob(File.join(fixtures_dir, "*.json")).each do |file|
       key = File.basename(file, ".json")
       fixtures[key] = JSON.parse(File.read(file))
     end
-    
+
     fixtures
   end
 end

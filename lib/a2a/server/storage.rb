@@ -23,16 +23,12 @@ end
 # tasks and related data. The storage layer is abstracted to allow
 # for different backends (memory, database, Redis, etc.).
 #
-module A2A
-  module Server
-    module Storage
-      # Storage backend types
-      TYPE_MEMORY = "memory"
-      TYPE_DATABASE = "database"
-      TYPE_REDIS = "redis"
+module A2A::Server::Storage
+  # Storage backend types
+  TYPE_MEMORY = "memory"
+  TYPE_DATABASE = "database"
+  TYPE_REDIS = "redis"
 
-      # Valid storage types
-      VALID_TYPES = [TYPE_MEMORY, TYPE_DATABASE, TYPE_REDIS].freeze
-    end
-  end
+  # Valid storage types
+  VALID_TYPES = [TYPE_MEMORY, TYPE_DATABASE, TYPE_REDIS].freeze
 end

@@ -14,9 +14,9 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           role: "user",
           text: "Hello, agent!"
         )
-        
+
         request = build_json_rpc_request("message/send", { message: message })
-        
+
         expect(request).to be_valid_json_rpc_request
         expect(request[:method]).to eq("message/send")
         expect(request[:params][:message]).to be_valid_a2a_message
@@ -28,9 +28,9 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           role: "invalid_role", # Invalid role
           parts: []
         }
-        
+
         request = build_json_rpc_request("message/send", { message: invalid_message })
-        
+
         expect(request).to be_valid_json_rpc_request
         expect(request[:params][:message]).not_to be_valid_a2a_message
       end
@@ -41,19 +41,19 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           message: message,
           streaming: true
         })
-        
+
         expect(request[:params][:streaming]).to be true
       end
 
       it "supports context parameter" do
         message = build_message
         context = { timeout: 30, priority: "high" }
-        
+
         request = build_json_rpc_request("message/send", {
           message: message,
           context: context
         })
-        
+
         expect(request[:params][:context]).to eq(context)
       end
     end
@@ -62,7 +62,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
       it "accepts valid message/stream requests" do
         message = build_message
         request = build_json_rpc_request("message/stream", { message: message })
-        
+
         expect(request).to be_valid_json_rpc_request
         expect(request[:method]).to eq("message/stream")
       end
@@ -72,7 +72,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
       it "accepts valid tasks/get requests" do
         task_id = test_uuid
         request = build_json_rpc_request("tasks/get", { id: task_id })
-        
+
         expect(request).to be_valid_json_rpc_request
         expect(request[:params][:id]).to eq(task_id)
       end
@@ -82,7 +82,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           id: test_uuid,
           historyLength: 10
         })
-        
+
         expect(request[:params][:historyLength]).to eq(10)
       end
 
@@ -91,7 +91,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           id: test_uuid,
           context: { includeArtifacts: true }
         })
-        
+
         expect(request[:params][:context][:includeArtifacts]).to be true
       end
     end
@@ -100,7 +100,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
       it "accepts valid tasks/cancel requests" do
         task_id = test_uuid
         request = build_json_rpc_request("tasks/cancel", { id: task_id })
-        
+
         expect(request).to be_valid_json_rpc_request
         expect(request[:params][:id]).to eq(task_id)
       end
@@ -110,7 +110,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           id: test_uuid,
           reason: "User requested cancellation"
         })
-        
+
         expect(request[:params][:reason]).to eq("User requested cancellation")
       end
     end
@@ -119,7 +119,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
       it "accepts valid tasks/resubscribe requests" do
         task_id = test_uuid
         request = build_json_rpc_request("tasks/resubscribe", { id: task_id })
-        
+
         expect(request).to be_valid_json_rpc_request
         expect(request[:params][:id]).to eq(task_id)
       end
@@ -128,7 +128,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
     context "agent/getCard method" do
       it "accepts valid agent/getCard requests" do
         request = build_json_rpc_request("agent/getCard", {})
-        
+
         expect(request).to be_valid_json_rpc_request
         expect(request[:method]).to eq("agent/getCard")
       end
@@ -137,7 +137,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
         request = build_json_rpc_request("agent/getCard", {
           context: { includeExtended: true }
         })
-        
+
         expect(request[:params][:context][:includeExtended]).to be true
       end
     end
@@ -145,7 +145,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
     context "agent/getAuthenticatedExtendedCard method" do
       it "accepts valid authenticated card requests" do
         request = build_json_rpc_request("agent/getAuthenticatedExtendedCard", {})
-        
+
         expect(request).to be_valid_json_rpc_request
         expect(request[:method]).to eq("agent/getAuthenticatedExtendedCard")
       end
@@ -160,7 +160,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           taskId: test_uuid,
           pushNotificationConfig: config
         })
-        
+
         expect(request).to be_valid_json_rpc_request
         expect(request[:params][:pushNotificationConfig]).to be_valid_push_notification_config
       end
@@ -172,7 +172,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           taskId: test_uuid,
           id: test_uuid
         })
-        
+
         expect(request).to be_valid_json_rpc_request
       end
     end
@@ -182,7 +182,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
         request = build_json_rpc_request("tasks/pushNotificationConfig/list", {
           taskId: test_uuid
         })
-        
+
         expect(request).to be_valid_json_rpc_request
       end
     end
@@ -193,7 +193,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           taskId: test_uuid,
           id: test_uuid
         })
-        
+
         expect(request).to be_valid_json_rpc_request
       end
     end
@@ -208,13 +208,13 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           kind: "message",
           parts: [{ kind: "text", text: "Hello" }]
         }
-        
+
         expect(message).to be_valid_a2a_message
       end
 
       it "validates message roles" do
-        valid_roles = ["user", "agent"]
-        
+        valid_roles = %w[user agent]
+
         valid_roles.each do |role|
           message = build_message(role: role)
           expect(message[:role]).to be_valid_message_role
@@ -234,7 +234,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           { kind: "file", file: { name: "test.txt", mimeType: "text/plain", bytes: "dGVzdA==" } },
           { kind: "data", data: { key: "value" } }
         ]
-        
+
         valid_parts.each do |part|
           message = build_message(parts: [part])
           expect(message).to be_valid_a2a_message
@@ -253,7 +253,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           extensions: [{ uri: "https://example.com/ext", data: {} }],
           referenceTaskIds: [test_uuid]
         }
-        
+
         expect(message).to be_valid_a2a_message
       end
     end
@@ -262,7 +262,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
       it "validates text parts" do
         text_part = { kind: "text", text: "Hello, world!" }
         message = build_message(parts: [text_part])
-        
+
         expect(message).to be_valid_a2a_message
       end
 
@@ -276,7 +276,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           }
         }
         message = build_message(parts: [file_part])
-        
+
         expect(message).to be_valid_a2a_message
       end
 
@@ -290,7 +290,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           }
         }
         message = build_message(parts: [file_part])
-        
+
         expect(message).to be_valid_a2a_message
       end
 
@@ -304,7 +304,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           }
         }
         message = build_message(parts: [data_part])
-        
+
         expect(message).to be_valid_a2a_message
       end
 
@@ -319,7 +319,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           }
         }
         message = build_message(parts: [part_with_metadata])
-        
+
         expect(message).to be_valid_a2a_message
       end
     end
@@ -337,19 +337,19 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
             updatedAt: Time.current.iso8601
           }
         }
-        
+
         expect(task).to be_valid_a2a_task
       end
 
       it "validates task states" do
-        valid_states = [
-          "submitted", "working", "input-required", "completed",
-          "canceled", "failed", "rejected", "auth-required", "unknown"
+        valid_states = %w[
+          submitted working input-required completed
+          canceled failed rejected auth-required unknown
         ]
-        
+
         valid_states.each do |state|
           expect(state).to be_valid_task_state
-          
+
           task = build_task(state: state)
           expect(task).to be_valid_a2a_task
         end
@@ -377,7 +377,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           history: [build_message],
           metadata: { priority: "high" }
         }
-        
+
         expect(task).to be_valid_a2a_task
       end
     end
@@ -390,7 +390,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           progress: 50,
           updatedAt: Time.current.iso8601
         }
-        
+
         task = build_task(status: status)
         expect(task).to be_valid_a2a_task
       end
@@ -404,7 +404,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           },
           updatedAt: Time.current.iso8601
         }
-        
+
         task = build_task(status: status)
         expect(task).to be_valid_a2a_task
       end
@@ -419,7 +419,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           },
           updatedAt: Time.current.iso8601
         }
-        
+
         task = build_task(status: status)
         expect(task).to be_valid_a2a_task
       end
@@ -443,7 +443,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           name description version url preferredTransport
           skills capabilities defaultInputModes defaultOutputModes
         ]
-        
+
         card = build_agent_card
         required_fields.each do |field|
           expect(card).to have_key(field)
@@ -452,10 +452,10 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
 
       it "validates transport protocols" do
         valid_transports = ["JSONRPC", "GRPC", "HTTP+JSON"]
-        
+
         valid_transports.each do |transport|
           expect(transport).to be_valid_transport
-          
+
           card = build_agent_card(preferredTransport: transport)
           expect(card).to be_valid_agent_card
         end
@@ -468,7 +468,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
             { transport: "HTTP+JSON", url: "https://example.com/rest" }
           ]
         )
-        
+
         expect(card).to be_valid_agent_card
       end
     end
@@ -479,12 +479,12 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           id: "text_analysis",
           name: "Text Analysis",
           description: "Analyze text content",
-          tags: ["nlp", "analysis"],
+          tags: %w[nlp analysis],
           examples: ["Analyze sentiment", "Extract entities"],
           inputModes: ["text/plain"],
           outputModes: ["application/json"]
         }
-        
+
         card = build_agent_card(skills: [skill])
         expect(card).to be_valid_agent_card
       end
@@ -494,9 +494,9 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           id: "secure_skill",
           name: "Secure Skill",
           description: "A skill requiring authentication",
-          security: [{ "oauth2" => ["read", "write"] }]
+          security: [{ "oauth2" => %w[read write] }]
         }
-        
+
         card = build_agent_card(skills: [skill])
         expect(card).to be_valid_agent_card
       end
@@ -510,7 +510,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           stateTransitionHistory: false,
           extensions: ["https://example.com/ext/v1"]
         }
-        
+
         card = build_agent_card(capabilities: capabilities)
         expect(card).to be_valid_agent_card
       end
@@ -532,7 +532,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
             }
           }
         }
-        
+
         card = build_agent_card(securitySchemes: security_scheme)
         expect(card).to be_valid_agent_card
       end
@@ -545,7 +545,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
             in: "header"
           }
         }
-        
+
         card = build_agent_card(securitySchemes: security_scheme)
         expect(card).to be_valid_agent_card
       end
@@ -564,7 +564,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
             updatedAt: Time.current.iso8601
           }
         }
-        
+
         expect(event).to be_valid_task_status_update_event
       end
     end
@@ -581,7 +581,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           },
           append: false
         }
-        
+
         expect(event).to be_valid_task_artifact_update_event
       end
 
@@ -595,7 +595,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           },
           append: true
         }
-        
+
         expect(event).to be_valid_task_artifact_update_event
       end
     end
@@ -615,7 +615,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
         A2A::Protocol::JsonRpc::CAPABILITY_NOT_SUPPORTED => "Capability not supported",
         A2A::Protocol::JsonRpc::RESOURCE_EXHAUSTED => "Resource exhausted"
       }
-      
+
       a2a_errors.each do |code, message|
         error_response = create_json_rpc_error(code: code, message: message)
         expect(error_response).to have_a2a_error(code)
@@ -632,7 +632,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           timezone: "UTC"
         }
       }
-      
+
       message = build_message(extensions: [extension])
       expect(message).to be_valid_a2a_message
     end
@@ -643,7 +643,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           extensions: ["https://example.com/extensions/traceability/v1"]
         }
       )
-      
+
       expect(card).to be_valid_agent_card
     end
   end

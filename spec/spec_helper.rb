@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# frozen_string_literal: true
-
 # Coverage configuration (equivalent to pytest-cov)
 require "simplecov"
 require "simplecov-lcov"
@@ -16,15 +14,15 @@ SimpleCov.start do
     formatter SimpleCov::Formatter::LcovFormatter
   else
     formatter SimpleCov::Formatter::MultiFormatter.new([
-      SimpleCov::Formatter::HTMLFormatter,
-      SimpleCov::Formatter::LcovFormatter
-    ])
+                                                         SimpleCov::Formatter::HTMLFormatter,
+                                                         SimpleCov::Formatter::LcovFormatter
+                                                       ])
   end
-  
+
   add_filter "/spec/"
   add_filter "/vendor/"
   add_filter "/tmp/"
-  
+
   # Group coverage by component (following a2a-python structure)
   add_group "Types", "lib/a2a/types"
   add_group "Protocol", "lib/a2a/protocol"
@@ -32,10 +30,10 @@ SimpleCov.start do
   add_group "Server", "lib/a2a/server"
   add_group "Transport", "lib/a2a/transport"
   add_group "Utils", "lib/a2a/utils"
-  
+
   # Track branches for comprehensive coverage
   enable_coverage :branch
-  
+
   # Minimum coverage threshold (will be raised as implementation progresses)
   # Temporarily disabled for development
   # minimum_coverage 50
@@ -66,11 +64,11 @@ VCR.configure do |config|
     record: :once,
     allow_unused_http_interactions: false
   }
-  
+
   # Filter sensitive data
-  config.filter_sensitive_data("<FILTERED_TOKEN>") { |interaction| 
+  config.filter_sensitive_data("<FILTERED_TOKEN>") do |interaction|
     interaction.request.headers["Authorization"]&.first
-  }
+  end
 end
 
 # Performance testing gems (optional)
@@ -94,7 +92,7 @@ require_relative "support/fixture_generators"
 require_relative "support/factory_bot"
 
 # Load any additional support files
-Dir[File.expand_path("support/**/*.rb", __dir__)].each { |f| require f }
+Dir[File.expand_path("support/**/*.rb", __dir__)].sort.each { |f| require f }
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure (equivalent to pytest markers)
@@ -130,44 +128,40 @@ RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
 
   # Reset A2A configuration before each test
-  config.before(:each) do
+  config.before do
     A2A.reset_configuration!
   end
 
   # Clean up after tests
-  config.after(:each) do
+  config.after do
     WebMock.reset!
   end
 
   # Configure async testing (equivalent to pytest-asyncio)
-  config.around(:each, :async) do |example|
-    # For future async test support
-    example.run
-  end
 
   # Performance testing configuration
   config.before(:each, :performance) do
     # Warm up Ruby VM for more consistent performance measurements
     GC.start
-    GC.disable if ENV['DISABLE_GC_DURING_PERFORMANCE_TESTS']
+    GC.disable if ENV["DISABLE_GC_DURING_PERFORMANCE_TESTS"]
   end
 
   config.after(:each, :performance) do
-    GC.enable if ENV['DISABLE_GC_DURING_PERFORMANCE_TESTS']
+    GC.enable if ENV["DISABLE_GC_DURING_PERFORMANCE_TESTS"]
   end
 
   # Skip performance tests in CI unless explicitly requested
-  config.filter_run_excluding :performance unless ENV['RUN_PERFORMANCE_TESTS']
-  
+  config.filter_run_excluding :performance unless ENV["RUN_PERFORMANCE_TESTS"]
+
   # Skip memory profiling tests if gems not available
   config.filter_run_excluding :memory unless defined?(GetProcessMem)
-  
+
   # Skip load testing in normal test runs
-  config.filter_run_excluding :load_testing unless ENV['RUN_LOAD_TESTS']
-  
+  config.filter_run_excluding :load_testing unless ENV["RUN_LOAD_TESTS"]
+
   # Skip regression tests unless baselines exist
-  config.filter_run_excluding :regression unless ENV['RUN_REGRESSION_TESTS']
-  
+  config.filter_run_excluding :regression unless ENV["RUN_REGRESSION_TESTS"]
+
   # Skip interoperability tests unless explicitly requested
-  config.filter_run_excluding :interoperability unless ENV['RUN_INTEROPERABILITY_TESTS']
+  config.filter_run_excluding :interoperability unless ENV["RUN_INTEROPERABILITY_TESTS"]
 end

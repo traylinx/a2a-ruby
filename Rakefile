@@ -14,7 +14,7 @@ begin
   RuboCop::RakeTask.new(:rubocop) do |task|
     task.options = ["--display-cop-names"]
   end
-  
+
   desc "Auto-correct RuboCop offenses"
   RuboCop::RakeTask.new("rubocop:autocorrect") do |task|
     task.options = ["--autocorrect"]

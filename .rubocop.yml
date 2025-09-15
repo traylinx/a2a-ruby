@@ -172,3 +172,10 @@ Bundler/OrderedGems:
 
 Bundler/DuplicatedGem:
   Enabled: true
+
+# Disable problematic cops that are causing errors
+Capybara/RSpec/PredicateMatcher:
+  Enabled: false
+
+FactoryBot/AssociationStyle:
+  Enabled: false

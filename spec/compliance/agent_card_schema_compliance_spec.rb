@@ -77,13 +77,13 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
     let(:base_card) { generate_minimal_agent_card }
 
     it "validates string fields" do
-      string_fields = [:name, :description, :version, :url, :preferredTransport]
-      
+      string_fields = %i[name description version url preferredTransport]
+
       string_fields.each do |field|
         # Valid string
         card = base_card.merge(field => "valid string")
         expect(card).to be_valid_agent_card
-        
+
         # Invalid non-string
         invalid_card = base_card.merge(field => 123)
         expect(invalid_card).not_to be_valid_agent_card
@@ -91,13 +91,13 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
     end
 
     it "validates array fields" do
-      array_fields = [:skills, :defaultInputModes, :defaultOutputModes]
-      
+      array_fields = %i[skills defaultInputModes defaultOutputModes]
+
       array_fields.each do |field|
         # Valid array
-        card = base_card.merge(field => ["item1", "item2"])
+        card = base_card.merge(field => %w[item1 item2])
         expect(card).to be_valid_agent_card
-        
+
         # Invalid non-array
         invalid_card = base_card.merge(field => "not an array")
         expect(invalid_card).not_to be_valid_agent_card
@@ -108,7 +108,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
       # Valid capabilities object
       card = base_card.merge(capabilities: { streaming: true })
       expect(card).to be_valid_agent_card
-      
+
       # Invalid non-object capabilities
       invalid_card = base_card.merge(capabilities: "not an object")
       expect(invalid_card).not_to be_valid_agent_card
@@ -120,7 +120,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
 
     it "accepts valid transport protocols" do
       valid_transports = ["JSONRPC", "GRPC", "HTTP+JSON"]
-      
+
       valid_transports.each do |transport|
         card = base_card.merge(preferredTransport: transport)
         expect(card).to be_valid_agent_card
@@ -129,8 +129,8 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
     end
 
     it "rejects invalid transport protocols" do
-      invalid_transports = ["HTTP", "REST", "WEBSOCKET", "invalid"]
-      
+      invalid_transports = %w[HTTP REST WEBSOCKET invalid]
+
       invalid_transports.each do |transport|
         card = base_card.merge(preferredTransport: transport)
         expect(card).not_to be_valid_agent_card
@@ -148,7 +148,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
           id: "text_processing",
           name: "Text Processing",
           description: "Process and analyze text content",
-          tags: ["nlp", "text", "analysis"],
+          tags: %w[nlp text analysis],
           examples: [
             "Analyze the sentiment of this text",
             "Extract key entities from this document"
@@ -157,7 +157,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
           outputModes: ["application/json", "text/plain"],
           security: [{ "oauth2" => ["read"] }]
         }
-        
+
         card = base_card.merge(skills: [skill])
         expect(card).to be_valid_agent_card
       end
@@ -168,7 +168,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
           name: "Minimal Skill",
           description: "A minimal skill"
         }
-        
+
         card = base_card.merge(skills: [skill])
         expect(card).to be_valid_agent_card
       end
@@ -179,7 +179,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
           { id: "missing_name", description: "No name field" },
           { id: "missing_desc", name: "Missing Description" }
         ]
-        
+
         incomplete_skills.each do |skill|
           card = base_card.merge(skills: [skill])
           expect(card).not_to be_valid_agent_card
@@ -191,12 +191,12 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
           id: "array_validation",
           name: "Array Validation",
           description: "Test arrays",
-          tags: ["tag1", "tag2"],
-          examples: ["example1", "example2"],
+          tags: %w[tag1 tag2],
+          examples: %w[example1 example2],
           inputModes: ["text/plain"],
           outputModes: ["application/json"]
         }
-        
+
         card = base_card.merge(skills: [skill])
         expect(card).to be_valid_agent_card
       end
@@ -208,9 +208,9 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
           id: "secure_skill",
           name: "Secure Skill",
           description: "Requires OAuth2",
-          security: [{ "oauth2" => ["read", "write"] }]
+          security: [{ "oauth2" => %w[read write] }]
         }
-        
+
         card = base_card.merge(skills: [skill])
         expect(card).to be_valid_agent_card
       end
@@ -222,7 +222,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
           description: "Requires API key",
           security: [{ "apiKey" => [] }]
         }
-        
+
         card = base_card.merge(skills: [skill])
         expect(card).to be_valid_agent_card
       end
@@ -237,7 +237,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
             { "apiKey" => [] }
           ]
         }
-        
+
         card = base_card.merge(skills: [skill])
         expect(card).to be_valid_agent_card
       end
@@ -253,7 +253,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
         pushNotifications: false,
         stateTransitionHistory: true
       }
-      
+
       card = base_card.merge(capabilities: capabilities)
       expect(card).to be_valid_agent_card
     end
@@ -265,7 +265,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
           "https://example.com/extensions/traceability/v1"
         ]
       }
-      
+
       card = base_card.merge(capabilities: capabilities)
       expect(card).to be_valid_agent_card
     end
@@ -283,7 +283,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
         extensions: ["https://example.com/ext/v1"],
         customCapability: "custom_value"
       }
-      
+
       card = base_card.merge(capabilities: capabilities)
       expect(card).to be_valid_agent_card
     end
@@ -297,7 +297,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
         { transport: "GRPC", url: "grpc://example.com:443" },
         { transport: "HTTP+JSON", url: "https://example.com/rest" }
       ]
-      
+
       card = base_card.merge(additionalInterfaces: interfaces)
       expect(card).to be_valid_agent_card
     end
@@ -308,7 +308,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
         { transport: "GRPC", url: "grpc://example.com:443" },
         { transport: "HTTP+JSON", url: "https://example.com/rest" }
       ]
-      
+
       valid_interfaces.each do |interface|
         card = base_card.merge(additionalInterfaces: [interface])
         expect(card).to be_valid_agent_card
@@ -327,7 +327,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
         { transport: "GRPC", url: "grpc://grpc.example.com:443" },
         { transport: "HTTP+JSON", url: "http://localhost:8080/api" }
       ]
-      
+
       card = base_card.merge(additionalInterfaces: interfaces)
       expect(card).to be_valid_agent_card
     end
@@ -352,7 +352,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
             }
           }
         }
-        
+
         card = base_card.merge(securitySchemes: security_schemes)
         expect(card).to be_valid_agent_card
       end
@@ -373,7 +373,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
             }
           }
         }
-        
+
         card = base_card.merge(securitySchemes: security_schemes)
         expect(card).to be_valid_agent_card
       end
@@ -395,7 +395,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
             }
           }
         }
-        
+
         card = base_card.merge(securitySchemes: security_schemes)
         expect(card).to be_valid_agent_card
       end
@@ -410,7 +410,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
             in: "header"
           }
         }
-        
+
         card = base_card.merge(securitySchemes: security_schemes)
         expect(card).to be_valid_agent_card
       end
@@ -423,7 +423,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
             in: "query"
           }
         }
-        
+
         card = base_card.merge(securitySchemes: security_schemes)
         expect(card).to be_valid_agent_card
       end
@@ -437,7 +437,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
             scheme: "basic"
           }
         }
-        
+
         card = base_card.merge(securitySchemes: security_schemes)
         expect(card).to be_valid_agent_card
       end
@@ -450,7 +450,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
             bearerFormat: "JWT"
           }
         }
-        
+
         card = base_card.merge(securitySchemes: security_schemes)
         expect(card).to be_valid_agent_card
       end
@@ -464,7 +464,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
             openIdConnectUrl: "https://auth.example.com/.well-known/openid_configuration"
           }
         }
-        
+
         card = base_card.merge(securitySchemes: security_schemes)
         expect(card).to be_valid_agent_card
       end
@@ -477,7 +477,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
             type: "mutualTLS"
           }
         }
-        
+
         card = base_card.merge(securitySchemes: security_schemes)
         expect(card).to be_valid_agent_card
       end
@@ -505,7 +505,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
             scheme: "bearer"
           }
         }
-        
+
         card = base_card.merge(securitySchemes: security_schemes)
         expect(card).to be_valid_agent_card
       end
@@ -516,7 +516,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
     let(:base_card) { generate_minimal_agent_card }
 
     it "validates OAuth2 security requirements" do
-      security = [{ "oauth2" => ["read", "write"] }]
+      security = [{ "oauth2" => %w[read write] }]
       card = base_card.merge(security: security)
       expect(card).to be_valid_agent_card
     end
@@ -552,7 +552,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
         url: "https://example.com",
         email: "support@example.com"
       }
-      
+
       card = base_card.merge(provider: provider)
       expect(card).to be_valid_agent_card
     end
@@ -575,7 +575,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
           signature: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
         }
       ]
-      
+
       card = base_card.merge(signatures: signatures)
       expect(card).to be_valid_agent_card
     end
@@ -596,7 +596,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
         environment: "production",
         customField: "custom_value"
       }
-      
+
       card = base_card.merge(metadata: metadata)
       expect(card).to be_valid_agent_card
     end
@@ -617,7 +617,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
         "audio/mpeg",
         "video/mp4"
       ]
-      
+
       card = base_card.merge(
         defaultInputModes: common_modes,
         defaultOutputModes: common_modes
@@ -633,7 +633,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
         "video/*",
         "application/*"
       ]
-      
+
       card = base_card.merge(
         defaultInputModes: wildcard_modes,
         defaultOutputModes: wildcard_modes
@@ -647,7 +647,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
         "application/vnd.example.custom+json",
         "text/vnd.example.special"
       ]
-      
+
       card = base_card.merge(
         defaultInputModes: custom_modes,
         defaultOutputModes: custom_modes
@@ -659,33 +659,33 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
   describe "Comprehensive Agent Card Validation" do
     it "validates the full agent card from fixture generator" do
       card = generate_full_agent_card
-      
+
       # Validate overall structure
       expect(card).to be_valid_agent_card
-      
+
       # Validate specific components
-      expect(card[:skills]).to all(satisfy { |skill| 
+      expect(card[:skills]).to all(satisfy { |skill|
         skill.key?(:id) && skill.key?(:name) && skill.key?(:description)
       })
-      
+
       expect(card[:additionalInterfaces]).to all(satisfy { |interface|
         A2A::Types::VALID_TRANSPORTS.include?(interface[:transport])
       })
-      
+
       expect(card[:securitySchemes]).to be_a(Hash)
       expect(card[:capabilities]).to be_a(Hash)
     end
 
     it "validates agent card serialization and deserialization" do
       original_card = generate_full_agent_card
-      
+
       # Serialize to JSON and back
       json_string = original_card.to_json
       parsed_card = JSON.parse(json_string, symbolize_names: true)
-      
+
       # Should still be valid after round-trip
       expect(parsed_card).to be_valid_agent_card
-      
+
       # Key fields should be preserved
       expect(parsed_card[:name]).to eq(original_card[:name])
       expect(parsed_card[:version]).to eq(original_card[:version])
@@ -700,13 +700,13 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
       card = base_card.merge(
         skills: [],
         defaultInputModes: ["text/plain"], # Must have at least one
-        defaultOutputModes: ["text/plain"]  # Must have at least one
+        defaultOutputModes: ["text/plain"] # Must have at least one
       )
       expect(card).to be_valid_agent_card
     end
 
     it "handles very long field values" do
-      long_description = "A" * 10000 # 10KB description
+      long_description = "A" * 10_000 # 10KB description
       card = base_card.merge(description: long_description)
       expect(card).to be_valid_agent_card
     end
@@ -750,7 +750,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
           }
         }
       }
-      
+
       card = base_card.merge(securitySchemes: complex_security)
       expect(card).to be_valid_agent_card
     end

@@ -1,24 +1,24 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require "spec_helper"
 
-RSpec.describe 'Transport Integration' do
-  describe 'HTTP Transport with JSON-RPC' do
-    let(:base_url) { 'https://api.example.com' }
+RSpec.describe "Transport Integration" do
+  describe "HTTP Transport with JSON-RPC" do
+    let(:base_url) { "https://api.example.com" }
     let(:transport) { A2A::Transport::Http.new(base_url) }
 
-    it 'handles complete JSON-RPC request/response cycle' do
+    it "handles complete JSON-RPC request/response cycle" do
       rpc_request = {
-        jsonrpc: '2.0',
-        method: 'message/send',
+        jsonrpc: "2.0",
+        method: "message/send",
         params: {
           message: {
-            message_id: 'test-123',
-            role: 'user',
+            message_id: "test-123",
+            role: "user",
             parts: [
               {
-                kind: 'text',
-                text: 'Hello, agent!'
+                kind: "text",
+                text: "Hello, agent!"
               }
             ]
           }
@@ -27,13 +27,13 @@ RSpec.describe 'Transport Integration' do
       }
 
       rpc_response = {
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         result: {
           task: {
-            id: 'task-456',
-            context_id: 'ctx-789',
+            id: "task-456",
+            context_id: "ctx-789",
             status: {
-              state: 'submitted'
+              state: "submitted"
             }
           }
         },
@@ -43,33 +43,33 @@ RSpec.describe 'Transport Integration' do
       stub_request(:post, base_url)
         .with(
           body: rpc_request.to_json,
-          headers: { 'Content-Type' => 'application/json' }
+          headers: { "Content-Type" => "application/json" }
         )
         .to_return(
           status: 200,
           body: rpc_response.to_json,
-          headers: { 'Content-Type' => 'application/json' }
+          headers: { "Content-Type" => "application/json" }
         )
 
       response = transport.json_rpc_request(rpc_request)
 
-      expect(response['jsonrpc']).to eq('2.0')
-      expect(response['result']['task']['id']).to eq('task-456')
-      expect(response['id']).to eq(1)
+      expect(response["jsonrpc"]).to eq("2.0")
+      expect(response["result"]["task"]["id"]).to eq("task-456")
+      expect(response["id"]).to eq(1)
     end
 
-    it 'handles error responses correctly' do
+    it "handles error responses correctly" do
       rpc_request = {
-        jsonrpc: '2.0',
-        method: 'invalid/method',
+        jsonrpc: "2.0",
+        method: "invalid/method",
         id: 1
       }
 
       error_response = {
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         error: {
-          code: -32601,
-          message: 'Method not found'
+          code: -32_601,
+          message: "Method not found"
         },
         id: 1
       }
@@ -79,65 +79,65 @@ RSpec.describe 'Transport Integration' do
         .to_return(
           status: 200,
           body: error_response.to_json,
-          headers: { 'Content-Type' => 'application/json' }
+          headers: { "Content-Type" => "application/json" }
         )
 
       response = transport.json_rpc_request(rpc_request)
 
-      expect(response['jsonrpc']).to eq('2.0')
-      expect(response['error']['code']).to eq(-32601)
-      expect(response['error']['message']).to eq('Method not found')
+      expect(response["jsonrpc"]).to eq("2.0")
+      expect(response["error"]["code"]).to eq(-32_601)
+      expect(response["error"]["message"]).to eq("Method not found")
     end
   end
 
-  describe 'SSE Event Processing' do
-    let(:url) { 'https://api.example.com/events' }
+  describe "SSE Event Processing" do
+    let(:url) { "https://api.example.com/events" }
     let(:sse) { A2A::Transport::SSE.new(url) }
 
-    it 'creates and formats events correctly' do
+    it "creates and formats events correctly" do
       event = A2A::Transport::SSEEvent.new(
-        type: 'task_status_update',
+        type: "task_status_update",
         data: {
-          task_id: 'task-123',
-          status: { state: 'completed' }
+          task_id: "task-123",
+          status: { state: "completed" }
         },
-        id: 'event-456'
+        id: "event-456"
       )
 
       sse_format = event.to_sse_format
 
-      expect(sse_format).to include('event: task_status_update')
-      expect(sse_format).to include('id: event-456')
+      expect(sse_format).to include("event: task_status_update")
+      expect(sse_format).to include("id: event-456")
       expect(sse_format).to include('data: {"task_id":"task-123"')
     end
 
-    it 'manages event listeners correctly' do
+    it "manages event listeners correctly" do
       received_events = []
-      
-      sse.on('message') do |event|
+
+      sse.on("message") do |event|
         received_events << event
       end
 
       # Simulate event emission
       test_event = A2A::Transport::SSEEvent.new(
-        type: 'message',
-        data: { text: 'Hello' }
+        type: "message",
+        data: { text: "Hello" }
       )
 
       sse.send(:emit_event, test_event)
 
       expect(received_events.size).to eq(1)
-      expect(received_events.first.type).to eq('message')
-      expect(received_events.first.data[:text]).to eq('Hello')
+      expect(received_events.first.type).to eq("message")
+      expect(received_events.first.data[:text]).to eq("Hello")
     end
   end
 
-  describe 'gRPC Transport (when available)' do
-    context 'when gRPC is not available' do
-      it 'provides helpful error message' do
-        expect {
-          A2A::Transport::Grpc.new('localhost:50051')
-        }.to raise_error(A2A::Errors::TransportError, /gRPC is not available/)
+  describe "gRPC Transport (when available)" do
+    context "when gRPC is not available" do
+      it "provides helpful error message" do
+        expect do
+          A2A::Transport::Grpc.new("localhost:50051")
+        end.to raise_error(A2A::Errors::TransportError, /gRPC is not available/)
       end
     end
   end

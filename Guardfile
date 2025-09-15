@@ -27,7 +27,7 @@ guard :rspec, cmd: "bundle exec rspec" do
 
   # Integration tests
   watch(%r{^lib/a2a/(.+)\.rb$}) { "spec/integration" }
-  
+
   # Configuration changes
   watch("lib/a2a/configuration.rb") { "spec/a2a/configuration_spec.rb" }
   watch("lib/a2a.rb") { "spec/a2a_spec.rb" }

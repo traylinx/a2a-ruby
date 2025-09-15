@@ -6,7 +6,7 @@
 #
 module A2AHelpers
   # Test data generators
-  
+
   # Generate a test UUID
   def test_uuid
     SecureRandom.uuid
@@ -59,7 +59,7 @@ module A2AHelpers
           id: "test_skill",
           name: "Test Skill",
           description: "A test skill",
-          tags: ["test", "example"]
+          tags: %w[test example]
         }
       ],
       capabilities: {
@@ -133,18 +133,16 @@ module A2AHelpers
   # Mock an A2A client with predefined responses
   def mock_a2a_client(responses = {})
     client = instance_double(A2A::Client::HttpClient)
-    
+
     # Set up default responses
-    allow(client).to receive(:send_message).and_return(build_message(role: "agent"))
-    allow(client).to receive(:get_task).and_return(build_task)
-    allow(client).to receive(:cancel_task).and_return(build_task(state: "canceled"))
-    allow(client).to receive(:get_card).and_return(build_agent_card)
-    
+    allow(client).to receive_messages(send_message: build_message(role: "agent"), get_task: build_task,
+      cancel_task: build_task(state: "canceled"), get_card: build_agent_card)
+
     # Override with custom responses
     responses.each do |method, response|
       allow(client).to receive(method).and_return(response)
     end
-    
+
     client
   end
 
@@ -161,18 +159,18 @@ module A2AHelpers
   # Stub A2A JSON-RPC request
   def stub_a2a_rpc_request(rpc_method:, url:, response: {}, error: nil)
     response_body = if error
-      {
-        jsonrpc: "2.0",
-        error: error,
-        id: 1
-      }
-    else
-      {
-        jsonrpc: "2.0",
-        result: response,
-        id: 1
-      }
-    end
+                      {
+                        jsonrpc: "2.0",
+                        error: error,
+                        id: 1
+                      }
+                    else
+                      {
+                        jsonrpc: "2.0",
+                        result: response,
+                        id: 1
+                      }
+                    end
 
     stub_request(:post, url)
       .with(
@@ -208,7 +206,7 @@ module A2AHelpers
   end
 
   # Protocol validation helpers
-  
+
   # Validate JSON-RPC 2.0 request structure
   def validate_json_rpc_request(request)
     expect(request).to be_valid_json_rpc_request
@@ -235,7 +233,7 @@ module A2AHelpers
   end
 
   # Test server helpers
-  
+
   # Create a test A2A server instance
   def create_test_server(port: nil)
     port ||= find_available_port
@@ -244,7 +242,7 @@ module A2AHelpers
 
   # Find an available port for testing
   def find_available_port
-    server = TCPServer.new('127.0.0.1', 0)
+    server = TCPServer.new("127.0.0.1", 0)
     port = server.addr[1]
     server.close
     port
@@ -254,13 +252,13 @@ module A2AHelpers
   def create_test_agent_class(&block)
     Class.new do
       include A2A::Server::Agent
-      
+
       instance_eval(&block) if block_given?
     end
   end
 
   # Authentication helpers
-  
+
   # Create OAuth2 test credentials
   def create_oauth2_credentials(client_id: nil, client_secret: nil, token_url: nil)
     {
@@ -276,19 +274,19 @@ module A2AHelpers
     default_payload = {
       sub: "test_user",
       iat: Time.current.to_i,
-      exp: (Time.current + 1.hour).to_i
+      exp: 1.hour.from_now.to_i
     }
-    
+
     # Simple JWT creation for testing (in real implementation, use JWT gem)
     header = Base64.urlsafe_encode64({ alg: "HS256", typ: "JWT" }.to_json)
     payload_encoded = Base64.urlsafe_encode64(default_payload.merge(payload).to_json)
     signature = Base64.urlsafe_encode64("fake_signature_for_testing")
-    
+
     "#{header}.#{payload_encoded}.#{signature}"
   end
 
   # Streaming helpers
-  
+
   # Create a test SSE stream
   def create_test_sse_stream(*events)
     Enumerator.new do |yielder|
@@ -304,28 +302,28 @@ module A2AHelpers
     lines = []
     lines << "id: #{id}" if id
     lines << "event: #{event_type}" if event_type
-    
-    if data.is_a?(Hash) || data.is_a?(Array)
-      lines << "data: #{data.to_json}"
-    else
-      lines << "data: #{data}"
-    end
-    
-    lines.join("\n") + "\n\n"
+
+    lines << if data.is_a?(Hash) || data.is_a?(Array)
+               "data: #{data.to_json}"
+             else
+               "data: #{data}"
+             end
+
+    "#{lines.join("\n")}\n\n"
   end
 
   # Parse SSE event from string
   def parse_sse_event(sse_string)
     lines = sse_string.strip.split("\n")
     event = {}
-    
+
     lines.each do |line|
       if line.start_with?("id: ")
-        event[:id] = line[4..-1]
+        event[:id] = line[4..]
       elsif line.start_with?("event: ")
-        event[:event] = line[7..-1]
+        event[:event] = line[7..]
       elsif line.start_with?("data: ")
-        data = line[6..-1]
+        data = line[6..]
         begin
           event[:data] = JSON.parse(data)
         rescue JSON::ParserError
@@ -333,12 +331,12 @@ module A2AHelpers
         end
       end
     end
-    
+
     event
   end
 
   # Error testing helpers
-  
+
   # Create a JSON-RPC error response
   def create_json_rpc_error(code:, message:, data: nil, id: 1)
     A2A::Protocol::JsonRpc.build_error_response(
@@ -355,13 +353,13 @@ module A2AHelpers
   end
 
   # Performance testing helpers
-  
+
   # Measure execution time
-  def measure_time(&block)
+  def measure_time
     start_time = Time.current
-    result = block.call
+    result = yield
     end_time = Time.current
-    
+
     {
       result: result,
       duration: end_time - start_time,
@@ -370,13 +368,13 @@ module A2AHelpers
   end
 
   # Measure memory usage (requires get_process_mem gem)
-  def measure_memory(&block)
-    return { result: block.call, memory_mb: 0 } unless defined?(GetProcessMem)
-    
+  def measure_memory
+    return { result: yield, memory_mb: 0 } unless defined?(GetProcessMem)
+
     mem_before = GetProcessMem.new.mb
-    result = block.call
+    result = yield
     mem_after = GetProcessMem.new.mb
-    
+
     {
       result: result,
       memory_mb: (mem_after - mem_before).round(2)
@@ -384,20 +382,20 @@ module A2AHelpers
   end
 
   # Concurrency testing helpers
-  
+
   # Run block concurrently with specified number of threads
-  def run_concurrently(thread_count: 10, &block)
+  def run_concurrently(thread_count: 10)
     threads = []
     results = []
     mutex = Mutex.new
-    
+
     thread_count.times do |i|
       threads << Thread.new do
-        result = block.call(i)
+        result = yield(i)
         mutex.synchronize { results << result }
       end
     end
-    
+
     threads.each(&:join)
     results
   end
@@ -407,13 +405,13 @@ module A2AHelpers
     start_time = Time.current
     end_time = start_time + duration
     results = []
-    
+
     while Time.current < end_time
       batch_results = run_concurrently(thread_count: concurrent_requests, &block)
       results.concat(batch_results)
       sleep(0.1) # Small delay between batches
     end
-    
+
     {
       total_requests: results.length,
       duration: duration,
@@ -423,50 +421,48 @@ module A2AHelpers
   end
 
   # Fixture helpers
-  
+
   # Load fixture file
   def load_fixture(filename)
-    fixture_path = File.join(File.dirname(__FILE__), '..', 'fixtures', filename)
-    
-    if File.exist?(fixture_path)
-      content = File.read(fixture_path)
-      
-      case File.extname(filename)
-      when '.json'
-        JSON.parse(content)
-      when '.yml', '.yaml'
-        YAML.safe_load(content)
-      else
-        content
-      end
+    fixture_path = File.join(File.dirname(__FILE__), "..", "fixtures", filename)
+
+    raise "Fixture file not found: #{fixture_path}" unless File.exist?(fixture_path)
+
+    content = File.read(fixture_path)
+
+    case File.extname(filename)
+    when ".json"
+      JSON.parse(content)
+    when ".yml", ".yaml"
+      YAML.safe_load(content)
     else
-      raise "Fixture file not found: #{fixture_path}"
+      content
     end
   end
 
   # Save fixture file (for generating test data)
   def save_fixture(filename, data)
-    fixture_path = File.join(File.dirname(__FILE__), '..', 'fixtures', filename)
+    fixture_path = File.join(File.dirname(__FILE__), "..", "fixtures", filename)
     FileUtils.mkdir_p(File.dirname(fixture_path))
-    
+
     content = case File.extname(filename)
-              when '.json'
+              when ".json"
                 JSON.pretty_generate(data)
-              when '.yml', '.yaml'
+              when ".yml", ".yaml"
                 data.to_yaml
               else
                 data.to_s
               end
-    
+
     File.write(fixture_path, content)
   end
 
   # WebMock helpers
-  
+
   # Stub all A2A endpoints for an agent
   def stub_a2a_agent(base_url:, agent_card: nil, responses: {})
     agent_card ||= build_agent_card(url: "#{base_url}/a2a")
-    
+
     # Stub agent card endpoint
     stub_request(:get, "#{base_url}/agent-card")
       .to_return(
@@ -474,7 +470,7 @@ module A2AHelpers
         body: agent_card.to_json,
         headers: { "Content-Type" => "application/json" }
       )
-    
+
     # Stub RPC endpoint with custom responses
     responses.each do |method, response|
       stub_a2a_rpc_request(
@@ -492,37 +488,37 @@ module A2AHelpers
       method: method
     }
     expected_body[:params] = params if params
-    
+
     expect(WebMock).to have_requested(:post, url)
       .with(body: hash_including(expected_body))
   end
 
   # VCR helpers
-  
+
   # Use VCR cassette with A2A-specific configuration
   def with_a2a_vcr_cassette(name, **options, &block)
     default_options = {
       record: :once,
-      match_requests_on: [:method, :uri, :body],
+      match_requests_on: %i[method uri body],
       allow_unused_http_interactions: false
     }
-    
+
     VCR.use_cassette(name, default_options.merge(options), &block)
   end
 
   # Environment helpers
-  
+
   # Temporarily set environment variables
-  def with_env(env_vars, &block)
+  def with_env(env_vars)
     original_values = {}
-    
+
     env_vars.each do |key, value|
-      original_values[key] = ENV[key]
+      original_values[key] = ENV.fetch(key, nil)
       ENV[key] = value
     end
-    
+
     begin
-      block.call
+      yield
     ensure
       original_values.each do |key, value|
         if value.nil?
@@ -535,7 +531,7 @@ module A2AHelpers
   end
 
   # Configuration helpers
-  
+
   # Create test A2A configuration
   def create_test_config(**overrides)
     default_config = {
@@ -545,20 +541,20 @@ module A2AHelpers
       enable_streaming: true,
       enable_push_notifications: true
     }
-    
+
     A2A::Configuration.new(default_config.merge(overrides))
   end
 
   # Temporarily override A2A configuration
-  def with_a2a_config(**config_overrides, &block)
+  def with_a2a_config(**config_overrides)
     original_config = A2A.configuration.dup
-    
+
     begin
       config_overrides.each do |key, value|
         A2A.configuration.send("#{key}=", value)
       end
-      
-      block.call
+
+      yield
     ensure
       A2A.instance_variable_set(:@configuration, original_config)
     end
@@ -579,9 +575,9 @@ class TestA2AServer
   def start
     return if running?
 
-    @server = TCPServer.new('127.0.0.1', @port)
+    @server = TCPServer.new("127.0.0.1", @port)
     @thread = Thread.new { run_server }
-    
+
     # Wait for server to start
     sleep(0.1) until running?
   end
@@ -602,7 +598,7 @@ class TestA2AServer
   private
 
   def find_available_port
-    server = TCPServer.new('127.0.0.1', 0)
+    server = TCPServer.new("127.0.0.1", 0)
     port = server.addr[1]
     server.close
     port
@@ -611,21 +607,21 @@ class TestA2AServer
   def run_server
     loop do
       client = @server.accept
-      
+
       # Simple HTTP server for testing
       request = client.gets
-      
-      if request&.include?('GET /agent-card')
+
+      if request&.include?("GET /agent-card")
         handle_agent_card_request(client)
-      elsif request&.include?('POST /a2a')
+      elsif request&.include?("POST /a2a")
         handle_rpc_request(client)
       else
         send_404_response(client)
       end
-      
+
       client.close
     end
-  rescue => e
+  rescue StandardError
     # Server stopped
   end
 
@@ -649,13 +645,11 @@ class TestA2AServer
     # Read request body
     content_length = 0
     while (line = client.gets.chomp) != ""
-      if line.start_with?("Content-Length:")
-        content_length = line.split(":")[1].strip.to_i
-      end
+      content_length = line.split(":")[1].strip.to_i if line.start_with?("Content-Length:")
     end
 
     body = client.read(content_length) if content_length > 0
-    
+
     # Simple echo response for testing
     response = {
       jsonrpc: "2.0",

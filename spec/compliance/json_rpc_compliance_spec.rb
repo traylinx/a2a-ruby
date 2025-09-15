@@ -2,7 +2,7 @@
 
 ##
 # JSON-RPC 2.0 Compliance Test Suite
-# 
+#
 # This test suite validates complete compliance with the JSON-RPC 2.0 specification
 # as required by the A2A protocol.
 #
@@ -22,7 +22,7 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
         }.to_json
 
         request = parser.parse_request(request_json)
-        
+
         expect(request).to be_a(A2A::Protocol::Request)
         expect(request.jsonrpc).to eq("2.0")
         expect(request.method).to eq("subtract")
@@ -39,7 +39,7 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
         }.to_json
 
         request = parser.parse_request(request_json)
-        
+
         expect(request.params).to eq({ "subtrahend" => 23, "minuend" => 42 })
       end
 
@@ -51,7 +51,7 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
         }.to_json
 
         request = parser.parse_request(request_json)
-        
+
         expect(request.notification?).to be true
         expect(request.id).to be_nil
       end
@@ -64,7 +64,7 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
         }.to_json
 
         request = parser.parse_request(request_json)
-        
+
         expect(request.params).to eq({})
         expect(request.id).to eq("1")
       end
@@ -114,27 +114,27 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
         ].to_json
 
         requests = parser.parse_request(batch_json)
-        
+
         expect(requests).to be_an(Array)
         expect(requests.length).to eq(4)
-        
+
         expect(requests[0].method).to eq("sum")
         expect(requests[0].id).to eq("1")
-        
+
         expect(requests[1].method).to eq("notify_hello")
         expect(requests[1].notification?).to be true
-        
+
         expect(requests[2].method).to eq("subtract")
         expect(requests[2].id).to eq("2")
-        
+
         expect(requests[3].method).to eq("get_data")
         expect(requests[3].id).to eq("9")
       end
 
       it "rejects empty batch requests" do
-        expect {
+        expect do
           parser.parse_request("[]")
-        }.to raise_error(A2A::Errors::InvalidRequest, /empty batch/i)
+        end.to raise_error(A2A::Errors::InvalidRequest, /empty batch/i)
       end
     end
 
@@ -146,9 +146,9 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
           id: 1
         }.to_json
 
-        expect {
+        expect do
           parser.parse_request(request_json)
-        }.to raise_error(A2A::Errors::InvalidRequest)
+        end.to raise_error(A2A::Errors::InvalidRequest)
       end
 
       it "rejects requests without jsonrpc field" do
@@ -157,9 +157,9 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
           id: 1
         }.to_json
 
-        expect {
+        expect do
           parser.parse_request(request_json)
-        }.to raise_error(A2A::Errors::InvalidRequest)
+        end.to raise_error(A2A::Errors::InvalidRequest)
       end
 
       it "rejects requests without method field" do
@@ -168,9 +168,9 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
           id: 1
         }.to_json
 
-        expect {
+        expect do
           parser.parse_request(request_json)
-        }.to raise_error(A2A::Errors::InvalidRequest)
+        end.to raise_error(A2A::Errors::InvalidRequest)
       end
 
       it "rejects requests with non-string method" do
@@ -180,9 +180,9 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
           id: 1
         }.to_json
 
-        expect {
+        expect do
           parser.parse_request(request_json)
-        }.to raise_error(A2A::Errors::InvalidRequest)
+        end.to raise_error(A2A::Errors::InvalidRequest)
       end
 
       it "rejects requests with invalid params type" do
@@ -193,21 +193,21 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
           id: 1
         }.to_json
 
-        expect {
+        expect do
           parser.parse_request(request_json)
-        }.to raise_error(A2A::Errors::InvalidRequest)
+        end.to raise_error(A2A::Errors::InvalidRequest)
       end
 
       it "rejects invalid JSON" do
-        expect {
+        expect do
           parser.parse_request('{"jsonrpc": "2.0", "method": "test", "id": 1,}') # trailing comma
-        }.to raise_error(A2A::Errors::ParseError)
+        end.to raise_error(A2A::Errors::ParseError)
       end
 
       it "rejects non-JSON input" do
-        expect {
+        expect do
           parser.parse_request("not json at all")
-        }.to raise_error(A2A::Errors::ParseError)
+        end.to raise_error(A2A::Errors::ParseError)
       end
     end
   end
@@ -216,7 +216,7 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
     context "success responses" do
       it "builds responses with results" do
         response = parser.build_response(result: "success", id: 1)
-        
+
         expect(response).to be_valid_json_rpc_response
         expect(response[:jsonrpc]).to eq("2.0")
         expect(response[:result]).to eq("success")
@@ -227,14 +227,14 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
       it "builds responses with complex result objects" do
         result = { data: [1, 2, 3], status: "ok", metadata: { count: 3 } }
         response = parser.build_response(result: result, id: "test-id")
-        
+
         expect(response[:result]).to eq(result)
         expect(response[:id]).to eq("test-id")
       end
 
       it "builds responses with null results" do
         response = parser.build_response(result: nil, id: 1)
-        
+
         expect(response[:result]).to be_nil
         expect(response).to have_key(:result)
       end
@@ -242,9 +242,9 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
 
     context "error responses" do
       it "builds error responses with all fields" do
-        error = { code: -32601, message: "Method not found", data: "Additional info" }
+        error = { code: -32_601, message: "Method not found", data: "Additional info" }
         response = parser.build_response(error: error, id: 1)
-        
+
         expect(response).to be_valid_json_rpc_response
         expect(response[:jsonrpc]).to eq("2.0")
         expect(response[:error]).to eq(error)
@@ -253,22 +253,22 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
       end
 
       it "builds error responses without data field" do
-        error = { code: -32600, message: "Invalid Request" }
+        error = { code: -32_600, message: "Invalid Request" }
         response = parser.build_response(error: error, id: nil)
-        
+
         expect(response[:error]).to eq(error)
         expect(response[:id]).to be_nil
       end
 
       it "builds error responses using build_error_response helper" do
         response = parser.build_error_response(
-          code: -32001,
+          code: -32_001,
           message: "Task not found",
           data: { taskId: "123" },
           id: 1
         )
-        
-        expect(response).to have_json_rpc_error(-32001)
+
+        expect(response).to have_json_rpc_error(-32_001)
         expect(response[:error][:message]).to eq("Task not found")
         expect(response[:error][:data]).to eq({ taskId: "123" })
       end
@@ -279,11 +279,11 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
         responses = [
           { jsonrpc: "2.0", result: 7, id: "1" },
           { jsonrpc: "2.0", result: 19, id: "2" },
-          { jsonrpc: "2.0", error: { code: -32601, message: "Method not found" }, id: "5" }
+          { jsonrpc: "2.0", error: { code: -32_601, message: "Method not found" }, id: "5" }
         ]
-        
+
         batch_response = parser.build_batch_response(responses)
-        
+
         expect(batch_response).to be_an(Array)
         expect(batch_response.length).to eq(3)
         batch_response.each { |resp| expect(resp).to be_valid_json_rpc_response }
@@ -295,25 +295,25 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
           { jsonrpc: "2.0", result: nil, id: nil }, # notification response
           { jsonrpc: "2.0", result: 19, id: "2" }
         ]
-        
+
         batch_response = parser.build_batch_response(responses)
-        
+
         expect(batch_response.length).to eq(2)
-        expect(batch_response.map { |r| r[:id] }).to eq(["1", "2"])
+        expect(batch_response.pluck(:id)).to eq(%w[1 2])
       end
     end
 
     context "validation" do
       it "rejects responses with both result and error" do
-        expect {
+        expect do
           parser.build_response(result: "success", error: { code: -1, message: "error" }, id: 1)
-        }.to raise_error(ArgumentError, /cannot specify both/i)
+        end.to raise_error(ArgumentError, /cannot specify both/i)
       end
 
       it "rejects responses with neither result nor error" do
-        expect {
+        expect do
           parser.build_response(id: 1)
-        }.to raise_error(ArgumentError, /must specify either/i)
+        end.to raise_error(ArgumentError, /must specify either/i)
       end
     end
   end
@@ -321,37 +321,37 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
   describe "Error Code Compliance" do
     context "standard JSON-RPC error codes" do
       it "defines parse error code" do
-        expect(parser::PARSE_ERROR).to eq(-32700)
+        expect(parser::PARSE_ERROR).to eq(-32_700)
       end
 
       it "defines invalid request code" do
-        expect(parser::INVALID_REQUEST).to eq(-32600)
+        expect(parser::INVALID_REQUEST).to eq(-32_600)
       end
 
       it "defines method not found code" do
-        expect(parser::METHOD_NOT_FOUND).to eq(-32601)
+        expect(parser::METHOD_NOT_FOUND).to eq(-32_601)
       end
 
       it "defines invalid params code" do
-        expect(parser::INVALID_PARAMS).to eq(-32602)
+        expect(parser::INVALID_PARAMS).to eq(-32_602)
       end
 
       it "defines internal error code" do
-        expect(parser::INTERNAL_ERROR).to eq(-32603)
+        expect(parser::INTERNAL_ERROR).to eq(-32_603)
       end
     end
 
     context "A2A-specific error codes" do
       it "defines task not found code" do
-        expect(parser::TASK_NOT_FOUND).to eq(-32001)
+        expect(parser::TASK_NOT_FOUND).to eq(-32_001)
       end
 
       it "defines task not cancelable code" do
-        expect(parser::TASK_NOT_CANCELABLE).to eq(-32002)
+        expect(parser::TASK_NOT_CANCELABLE).to eq(-32_002)
       end
 
       it "defines authentication required code" do
-        expect(parser::AUTHENTICATION_REQUIRED).to eq(-32004)
+        expect(parser::AUTHENTICATION_REQUIRED).to eq(-32_004)
       end
 
       it "uses A2A error codes in range -32001 to -32010" do
@@ -367,9 +367,9 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
           parser::CAPABILITY_NOT_SUPPORTED,
           parser::RESOURCE_EXHAUSTED
         ]
-        
+
         a2a_codes.each do |code|
-          expect(code).to be_between(-32010, -32001)
+          expect(code).to be_between(-32_010, -32_001)
         end
       end
     end
@@ -383,7 +383,7 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
         "params" => { "key" => "value" },
         "id" => 1
       }
-      
+
       expect(parser.valid_request?(valid_request)).to be true
     end
 
@@ -397,7 +397,7 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
         { "jsonrpc" => "2.0", "method" => 123, "id" => 1 }, # invalid method type
         { "jsonrpc" => "2.0", "method" => "test", "params" => "invalid", "id" => 1 }
       ]
-      
+
       invalid_requests.each do |request|
         expect(parser.valid_request?(request)).to be false
       end
@@ -406,7 +406,7 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
 
   describe "Edge Cases and Robustness" do
     it "handles very large request IDs" do
-      large_id = 2**53 - 1 # Maximum safe integer in JSON
+      large_id = (2**53) - 1 # Maximum safe integer in JSON
       request_json = {
         jsonrpc: "2.0",
         method: "test",
@@ -443,7 +443,7 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
           }
         }
       }
-      
+
       request_json = {
         jsonrpc: "2.0",
         method: "deep_test",
@@ -488,12 +488,12 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
       end
 
       batch_json = large_batch.to_json
-      
+
       result = measure_time do
         requests = parser.parse_request(batch_json)
         expect(requests.length).to eq(1000)
       end
-      
+
       # Should parse 1000 requests in reasonable time (< 1 second)
       expect(result[:duration]).to be < 1.0
     end
@@ -511,7 +511,7 @@ RSpec.describe "JSON-RPC 2.0 Compliance", :compliance do
         request = parser.parse_request(request_json)
         expect(request.params["data"].length).to eq(100_000)
       end
-      
+
       # Should handle large payloads efficiently
       expect(result[:duration]).to be < 0.5
     end

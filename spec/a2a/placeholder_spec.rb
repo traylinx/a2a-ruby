@@ -4,7 +4,7 @@ require "spec_helper"
 
 RSpec.describe "A2A Placeholder" do
   it "has a version number" do
-    expect(A2A::VERSION).not_to be nil
+    expect(A2A::VERSION).not_to be_nil
   end
 
   it "can be configured" do

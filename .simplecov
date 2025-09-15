@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # SimpleCov configuration for A2A Ruby SDK
 # Following a2a-python coverage patterns
 
@@ -9,9 +11,9 @@ SimpleCov.start do
     formatter SimpleCov::Formatter::LcovFormatter
   else
     formatter SimpleCov::Formatter::MultiFormatter.new([
-      SimpleCov::Formatter::HTMLFormatter,
-      SimpleCov::Formatter::LcovFormatter
-    ])
+                                                         SimpleCov::Formatter::HTMLFormatter,
+                                                         SimpleCov::Formatter::LcovFormatter
+                                                       ])
   end
 
   # Coverage tracking
@@ -40,5 +42,5 @@ SimpleCov.start do
   minimum_coverage_by_file 30
 
   # Refuse to merge results older than 8 hours
-  merge_timeout 28800
+  merge_timeout 28_800
 end

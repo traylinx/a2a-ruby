@@ -28,7 +28,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
             "source" => "python-sdk"
           }
         }
-        
+
         expect(python_message).to be_valid_a2a_message
       end
 
@@ -37,7 +37,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
           role: "agent",
           text: "Hello from Ruby SDK"
         )
-        
+
         # Convert to the format expected by Python SDK (camelCase)
         python_compatible = {
           "messageId" => ruby_message[:messageId],
@@ -45,7 +45,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
           "kind" => ruby_message[:kind],
           "parts" => ruby_message[:parts]
         }
-        
+
         expect(python_compatible).to be_valid_a2a_message
       end
 
@@ -66,9 +66,9 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
             }
           ]
         }
-        
+
         expect(python_file_message).to be_valid_a2a_message
-        
+
         # Python SDK file with URI
         python_uri_message = {
           "messageId" => test_uuid,
@@ -85,7 +85,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
             }
           ]
         }
-        
+
         expect(python_uri_message).to be_valid_a2a_message
       end
 
@@ -113,7 +113,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
             }
           ]
         }
-        
+
         expect(python_data_message).to be_valid_a2a_message
       end
     end
@@ -149,7 +149,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
             "priority" => "normal"
           }
         }
-        
+
         expect(python_task).to be_valid_a2a_task
       end
 
@@ -164,7 +164,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
             }
           ]
         )
-        
+
         # Convert to Python SDK format
         python_compatible = {
           "id" => ruby_task[:id],
@@ -173,16 +173,16 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
           "status" => ruby_task[:status],
           "artifacts" => ruby_task[:artifacts]
         }
-        
+
         expect(python_compatible).to be_valid_a2a_task
       end
 
       it "handles all task states consistently" do
-        task_states = [
-          "submitted", "working", "input-required", "completed",
-          "canceled", "failed", "rejected", "auth-required", "unknown"
+        task_states = %w[
+          submitted working input-required completed
+          canceled failed rejected auth-required unknown
         ]
-        
+
         task_states.each do |state|
           python_task = {
             "id" => test_uuid,
@@ -193,7 +193,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
               "updatedAt" => Time.current.iso8601
             }
           }
-          
+
           expect(python_task).to be_valid_a2a_task
           expect(state).to be_valid_task_state
         end
@@ -216,7 +216,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
               "id" => "python_skill",
               "name" => "Python Processing",
               "description" => "Process data using Python",
-              "tags" => ["python", "processing"],
+              "tags" => %w[python processing],
               "examples" => ["Process this data", "Analyze with Python"]
             }
           ],
@@ -248,10 +248,10 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
             }
           },
           "security" => [
-            { "oauth2" => ["read", "write"] }
+            { "oauth2" => %w[read write] }
           ]
         }
-        
+
         expect(python_agent_card).to be_valid_agent_card
       end
 
@@ -260,17 +260,17 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
           name: "Ruby Test Agent",
           description: "An agent implemented with the Ruby SDK"
         )
-        
+
         # Ensure compatibility with Python SDK expectations
         expect(ruby_card).to be_valid_agent_card
         expect(ruby_card[:preferredTransport]).to be_valid_transport
-        
+
         # Check that all required fields are present
         required_fields = %w[
           name description version url preferredTransport
           skills capabilities defaultInputModes defaultOutputModes
         ]
-        
+
         required_fields.each do |field|
           expect(ruby_card).to have_key(field.to_sym)
         end
@@ -297,9 +297,9 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
           },
           "id" => 1
         }
-        
+
         expect(python_request).to be_valid_json_rpc_request
-        
+
         # Parse using Ruby implementation
         parsed = A2A::Protocol::JsonRpc.parse_request(python_request.to_json)
         expect(parsed.method).to eq("message/send")
@@ -318,7 +318,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
           },
           id: 1
         )
-        
+
         expect(ruby_response).to be_valid_json_rpc_response
         expect(ruby_response[:result]).to be_valid_a2a_message
       end
@@ -338,27 +338,27 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
             "id" => 2
           }
         ]
-        
+
         parsed_batch = A2A::Protocol::JsonRpc.parse_request(python_batch.to_json)
         expect(parsed_batch).to be_an(Array)
         expect(parsed_batch.length).to eq(2)
-        
+
         parsed_batch.each { |req| expect(req).to be_a(A2A::Protocol::Request) }
       end
 
       it "uses consistent error codes" do
         # Error codes should match between implementations
         error_mappings = {
-          A2A::Protocol::JsonRpc::PARSE_ERROR => -32700,
-          A2A::Protocol::JsonRpc::INVALID_REQUEST => -32600,
-          A2A::Protocol::JsonRpc::METHOD_NOT_FOUND => -32601,
-          A2A::Protocol::JsonRpc::INVALID_PARAMS => -32602,
-          A2A::Protocol::JsonRpc::INTERNAL_ERROR => -32603,
-          A2A::Protocol::JsonRpc::TASK_NOT_FOUND => -32001,
-          A2A::Protocol::JsonRpc::TASK_NOT_CANCELABLE => -32002,
-          A2A::Protocol::JsonRpc::AUTHENTICATION_REQUIRED => -32004
+          A2A::Protocol::JsonRpc::PARSE_ERROR => -32_700,
+          A2A::Protocol::JsonRpc::INVALID_REQUEST => -32_600,
+          A2A::Protocol::JsonRpc::METHOD_NOT_FOUND => -32_601,
+          A2A::Protocol::JsonRpc::INVALID_PARAMS => -32_602,
+          A2A::Protocol::JsonRpc::INTERNAL_ERROR => -32_603,
+          A2A::Protocol::JsonRpc::TASK_NOT_FOUND => -32_001,
+          A2A::Protocol::JsonRpc::TASK_NOT_CANCELABLE => -32_002,
+          A2A::Protocol::JsonRpc::AUTHENTICATION_REQUIRED => -32_004
         }
-        
+
         error_mappings.each do |constant, expected_code|
           expect(constant).to eq(expected_code)
         end
@@ -383,7 +383,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
             "version" => "1.0.0"
           }
         }
-        
+
         expect(python_event).to be_valid_task_status_update_event
       end
 
@@ -399,7 +399,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
               {
                 "kind" => "data",
                 "data" => {
-                  "results" => ["item1", "item2", "item3"],
+                  "results" => %w[item1 item2 item3],
                   "metadata" => { "count" => 3 }
                 }
               }
@@ -410,7 +410,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
             "generatedBy" => "python-sdk"
           }
         }
-        
+
         expect(python_artifact_event).to be_valid_task_artifact_update_event
       end
 
@@ -420,14 +420,14 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
           context_id: test_uuid,
           state: "completed"
         )
-        
+
         # Convert to format expected by Python SDK
         python_compatible = {
           "taskId" => ruby_status_event[:taskId],
           "contextId" => ruby_status_event[:contextId],
           "status" => ruby_status_event[:status]
         }
-        
+
         expect(python_compatible).to be_valid_task_status_update_event
       end
     end
@@ -441,10 +441,10 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
           "event: task_status_update\ndata: {\"taskId\":\"#{test_uuid}\",\"status\":{\"state\":\"completed\"}}\n\n",
           "id: event-123\nevent: task_artifact_update\ndata: {\"taskId\":\"#{test_uuid}\",\"artifact\":{\"artifactId\":\"#{test_uuid}\",\"parts\":[]}}\n\n"
         ]
-        
+
         python_sse_events.each do |sse_event|
           expect(sse_event).to be_valid_sse_event
-          
+
           parsed = parse_sse_event(sse_event)
           expect(parsed).to have_key(:data)
         end
@@ -456,15 +456,15 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
           context_id: test_uuid,
           state: "working"
         )
-        
+
         sse_event = format_sse_event(
           ruby_event_data,
           event_type: "task_status_update",
           id: "ruby-event-1"
         )
-        
+
         expect(sse_event).to be_valid_sse_event
-        
+
         parsed = parse_sse_event(sse_event)
         expect(parsed[:event]).to eq("task_status_update")
         expect(parsed[:id]).to eq("ruby-event-1")
@@ -483,10 +483,10 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
             aud: "a2a-api",
             sub: "python-client",
             scope: "read write",
-            exp: (Time.current + 1.hour).to_i
+            exp: 1.hour.from_now.to_i
           }
         )
-        
+
         # Should be parseable by Ruby implementation
         expect(python_oauth_token).to be_a(String)
         expect(python_oauth_token.split(".").length).to eq(3)
@@ -494,7 +494,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
 
       it "generates API keys compatible with Python SDK" do
         ruby_api_key = test_api_key
-        
+
         # API key format should be consistent
         expect(ruby_api_key).to start_with("ak_test_")
         expect(ruby_api_key.length).to be > 20
@@ -510,12 +510,12 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
           "Accept" => "application/json",
           "User-Agent" => /a2a-ruby/
         }
-        
+
         # Mock HTTP request to verify headers
         stub_request(:post, "https://example.com/a2a")
           .with(headers: expected_headers)
           .to_return(status: 200, body: { jsonrpc: "2.0", result: {}, id: 1 }.to_json)
-        
+
         # This would be tested in actual HTTP client implementation
         expect(true).to be true # Placeholder for actual HTTP client test
       end
@@ -531,7 +531,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
           500 => :internal_error,
           503 => :service_unavailable
         }
-        
+
         status_mappings.each do |code, expected|
           # Verify that Ruby implementation handles these consistently
           expect(code).to be_a(Integer)
@@ -568,11 +568,11 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
           },
           "id" => 1
         }
-        
+
         # Parse request (Ruby server receiving from Python client)
         parsed_request = A2A::Protocol::JsonRpc.parse_request(python_request.to_json)
         expect(parsed_request).to be_a(A2A::Protocol::Request)
-        
+
         # Generate response (Ruby server responding to Python client)
         ruby_response = A2A::Protocol::JsonRpc.build_response(
           result: {
@@ -585,7 +585,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
           },
           id: parsed_request.id
         )
-        
+
         expect(ruby_response).to be_valid_json_rpc_response
         expect(ruby_response[:result]).to be_valid_a2a_message
       end
@@ -601,9 +601,9 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
             "updatedAt" => Time.current.iso8601
           }
         }
-        
+
         expect(python_task).to be_valid_a2a_task
-        
+
         # Task updated by Ruby SDK
         ruby_updated_task = python_task.merge(
           "status" => {
@@ -612,7 +612,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
             "updatedAt" => Time.current.iso8601
           }
         )
-        
+
         expect(ruby_updated_task).to be_valid_a2a_task
       end
     end
@@ -629,14 +629,14 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
         array: [1, 2, 3],
         nested_object: {
           key: "value",
-          nested_array: ["a", "b", "c"]
+          nested_array: %w[a b c]
         }
       }
-      
+
       # Serialize and deserialize
       json_string = test_data.to_json
       parsed_data = JSON.parse(json_string, symbolize_names: true)
-      
+
       expect(parsed_data[:string]).to eq("test")
       expect(parsed_data[:number]).to eq(42)
       expect(parsed_data[:float]).to eq(3.14)
@@ -653,10 +653,10 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
         arabic: "مرحبا بالعالم",
         special_chars: "!@#$%^&*()_+-=[]{}|;':\",./<>?"
       }
-      
+
       json_string = unicode_data.to_json
       parsed_data = JSON.parse(json_string, symbolize_names: true)
-      
+
       expect(parsed_data[:emoji]).to eq("🚀🤖")
       expect(parsed_data[:chinese]).to eq("你好世界")
       expect(parsed_data[:arabic]).to eq("مرحبا بالعالم")

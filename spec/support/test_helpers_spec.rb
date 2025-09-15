@@ -27,7 +27,7 @@ RSpec.describe "A2A Test Helpers and Matchers" do
       it "validates error responses" do
         response = {
           jsonrpc: "2.0",
-          error: { code: -32001, message: "Task not found" },
+          error: { code: -32_001, message: "Task not found" },
           id: 1
         }
         expect(response).to be_valid_json_rpc_response
@@ -109,7 +109,7 @@ RSpec.describe "A2A Test Helpers and Matchers" do
     describe "JSON-RPC helpers" do
       it "builds valid JSON-RPC requests" do
         request = build_json_rpc_request("test/method", { param: "value" }, 123)
-        
+
         expect(request[:jsonrpc]).to eq("2.0")
         expect(request[:method]).to eq("test/method")
         expect(request[:params]).to eq({ param: "value" })
@@ -121,7 +121,7 @@ RSpec.describe "A2A Test Helpers and Matchers" do
           { method: "method1", params: { a: 1 } },
           { method: "method2", params: { b: 2 } }
         )
-        
+
         expect(batch).to be_an(Array)
         expect(batch.length).to eq(2)
         expect(batch[0][:method]).to eq("method1")
@@ -164,10 +164,10 @@ RSpec.describe "A2A Test Helpers and Matchers" do
           build_message(text: "First message"),
           build_message(text: "Second message")
         ]
-        
+
         stream = create_test_sse_stream(*events)
         expect(stream).to be_streaming_response
-        
+
         collected_events = stream.to_a
         expect(collected_events.length).to eq(2)
       end
@@ -175,7 +175,7 @@ RSpec.describe "A2A Test Helpers and Matchers" do
       it "formats SSE events" do
         data = { message: "test", id: 123 }
         sse_event = format_sse_event(data, event_type: "message", id: "event-1")
-        
+
         expect(sse_event).to include("id: event-1")
         expect(sse_event).to include("event: message")
         expect(sse_event).to include("data: #{data.to_json}")
@@ -184,7 +184,7 @@ RSpec.describe "A2A Test Helpers and Matchers" do
       it "parses SSE events" do
         sse_string = "id: test-1\nevent: message\ndata: {\"text\":\"hello\"}\n\n"
         parsed = parse_sse_event(sse_string)
-        
+
         expect(parsed[:id]).to eq("test-1")
         expect(parsed[:event]).to eq("message")
         expect(parsed[:data]).to eq({ "text" => "hello" })
@@ -197,7 +197,7 @@ RSpec.describe "A2A Test Helpers and Matchers" do
           sleep(0.01) # 10ms
           "test_result"
         end
-        
+
         expect(result[:result]).to eq("test_result")
         expect(result[:duration]).to be > 0.009
         expect(result[:duration_ms]).to be > 9
@@ -207,7 +207,7 @@ RSpec.describe "A2A Test Helpers and Matchers" do
         results = run_concurrently(thread_count: 5) do |thread_id|
           "result_#{thread_id}"
         end
-        
+
         expect(results.length).to eq(5)
         expect(results).to all(start_with("result_"))
       end
@@ -216,7 +216,7 @@ RSpec.describe "A2A Test Helpers and Matchers" do
     describe "Authentication helpers" do
       it "creates OAuth2 credentials" do
         creds = create_oauth2_credentials
-        
+
         expect(creds).to have_key(:client_id)
         expect(creds).to have_key(:client_secret)
         expect(creds).to have_key(:token_url)
@@ -224,7 +224,7 @@ RSpec.describe "A2A Test Helpers and Matchers" do
 
       it "creates JWT tokens" do
         token = create_jwt_token(payload: { user: "test" })
-        
+
         expect(token).to be_a(String)
         expect(token.split(".").length).to eq(3) # header.payload.signature
       end
@@ -232,13 +232,13 @@ RSpec.describe "A2A Test Helpers and Matchers" do
 
     describe "Environment helpers" do
       it "temporarily sets environment variables" do
-        original_value = ENV["TEST_VAR"]
-        
+        original_value = ENV.fetch("TEST_VAR", nil)
+
         with_env("TEST_VAR" => "test_value") do
-          expect(ENV["TEST_VAR"]).to eq("test_value")
+          expect(ENV.fetch("TEST_VAR", nil)).to eq("test_value")
         end
-        
-        expect(ENV["TEST_VAR"]).to eq(original_value)
+
+        expect(ENV.fetch("TEST_VAR", nil)).to eq(original_value)
       end
     end
   end
@@ -247,27 +247,27 @@ RSpec.describe "A2A Test Helpers and Matchers" do
     describe "mock_a2a_client" do
       it "creates a functional mock client" do
         client = mock_a2a_client
-        
+
         message = build_message
         response = client.send_message(message)
-        
+
         expect(response).to be_a(Hash)
         expect(response[:role]).to eq("agent")
       end
 
       it "supports streaming responses" do
         client = mock_a2a_client(streaming: true)
-        
+
         message = build_message
         response = client.send_message(message, streaming: true)
-        
+
         expect(response).to be_streaming_response
       end
 
       it "supports custom responses" do
         custom_response = build_message(text: "Custom response")
         client = mock_a2a_client(responses: { send_message: custom_response })
-        
+
         response = client.send_message(build_message)
         expect(response[:parts].first[:text]).to eq("Custom response")
       end
@@ -276,10 +276,10 @@ RSpec.describe "A2A Test Helpers and Matchers" do
     describe "mock_task_manager" do
       it "creates a functional task manager mock" do
         task_manager = mock_task_manager
-        
+
         task = task_manager.create_task(type: "test")
         expect(task).to be_valid_a2a_task
-        
+
         retrieved_task = task_manager.get_task(task[:id])
         expect(retrieved_task[:id]).to eq(task[:id])
       end
@@ -288,10 +288,10 @@ RSpec.describe "A2A Test Helpers and Matchers" do
     describe "mock_storage_backend" do
       it "provides in-memory storage simulation" do
         storage = mock_storage_backend
-        
+
         task = build_task
         storage.save_task(task)
-        
+
         retrieved = storage.get_task(task[:id])
         expect(retrieved[:id]).to eq(task[:id])
       end
@@ -302,7 +302,7 @@ RSpec.describe "A2A Test Helpers and Matchers" do
     describe "generate_full_agent_card" do
       it "creates comprehensive agent cards" do
         card = generate_full_agent_card
-        
+
         expect(card).to be_valid_agent_card
         expect(card[:skills]).not_to be_empty
         expect(card[:additionalInterfaces]).not_to be_empty
@@ -313,11 +313,11 @@ RSpec.describe "A2A Test Helpers and Matchers" do
     describe "generate_complex_message" do
       it "creates messages with multiple part types" do
         message = generate_complex_message
-        
+
         expect(message).to be_valid_a2a_message
         expect(message[:parts].length).to be > 1
-        
-        part_kinds = message[:parts].map { |p| p[:kind] }
+
+        part_kinds = message[:parts].pluck(:kind)
         expect(part_kinds).to include("text", "file", "data")
       end
     end
@@ -325,7 +325,7 @@ RSpec.describe "A2A Test Helpers and Matchers" do
     describe "generate_comprehensive_task" do
       it "creates tasks with full lifecycle data" do
         task = generate_comprehensive_task
-        
+
         expect(task).to be_valid_a2a_task
         expect(task[:artifacts]).not_to be_empty
         expect(task[:history]).not_to be_empty
@@ -337,14 +337,14 @@ RSpec.describe "A2A Test Helpers and Matchers" do
       it "creates a sequence of status updates" do
         task_id = test_uuid
         context_id = test_uuid
-        
+
         events = generate_task_status_events(
           task_id: task_id,
           context_id: context_id
         )
-        
+
         expect(events.length).to eq(3)
-        expect(events.map { |e| e[:status][:state] }).to eq(["submitted", "working", "completed"])
+        expect(events.map { |e| e[:status][:state] }).to eq(%w[submitted working completed])
         events.each { |event| expect(event).to be_valid_task_status_update_event }
       end
     end
@@ -355,19 +355,19 @@ RSpec.describe "A2A Test Helpers and Matchers" do
       # Create a mock client with custom agent card
       agent_card = generate_full_agent_card(name: "Integration Test Agent")
       client = mock_a2a_client(agent_card: agent_card)
-      
+
       # Send a complex message
       message = generate_complex_message
       validate_a2a_message(message)
-      
+
       # Get response (mocked)
       response = client.send_message(message)
       expect(response).to be_a(Hash)
-      
+
       # Create and validate a task
       task = generate_comprehensive_task
       validate_a2a_task(task)
-      
+
       # Test streaming
       stream = create_test_sse_stream(
         build_task_status_update(
@@ -377,7 +377,7 @@ RSpec.describe "A2A Test Helpers and Matchers" do
         )
       )
       expect(stream).to be_streaming_response
-      
+
       # Verify everything works together
       expect(agent_card).to be_valid_agent_card
       expect(message).to be_valid_a2a_message

@@ -61,12 +61,12 @@ end
 # @example Basic server usage
 #   class MyAgentController < ApplicationController
 #     include A2A::Server::Agent
-#     
+#
 #     a2a_skill "greeting" do |skill|
 #       skill.description = "Greet users"
 #       skill.tags = ["greeting", "conversation"]
 #     end
-#     
+#
 #     a2a_method "greet" do |params|
 #       { message: "Hello, #{params[:name]}!" }
 #     end
@@ -153,9 +153,7 @@ module A2A
 
     # Configure plugins from hash
     # @param plugin_configs [Hash] Plugin configurations
-    def configure_plugins(plugin_configs)
-      plugins.configure_plugins(plugin_configs)
-    end
+    delegate :configure_plugins, to: :plugins
 
     # Initialize monitoring system
     # @param config [A2A::Configuration] Configuration instance
@@ -165,15 +163,11 @@ module A2A
 
     # Get monitoring metrics
     # @return [A2A::Monitoring::MetricsCollector]
-    def metrics
-      A2A::Monitoring.metrics
-    end
+    delegate :metrics, to: :"A2A::Monitoring"
 
     # Get structured logger
     # @return [A2A::Monitoring::StructuredLogger]
-    def logger
-      A2A::Monitoring.logger
-    end
+    delegate :logger, to: :"A2A::Monitoring"
 
     # Record a metric
     # @param name [String] Metric name
