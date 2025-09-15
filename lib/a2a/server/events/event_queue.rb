@@ -186,7 +186,7 @@ module A2A
                 yield event
               rescue ThreadError
                 # Queue is empty, sleep briefly and try again
-                sleep 0.01
+                sleep 0.001 # Reduced sleep time for better responsiveness
               end
             end
           ensure

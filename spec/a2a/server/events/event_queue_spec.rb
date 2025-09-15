@@ -80,18 +80,19 @@ RSpec.describe A2A::Server::Events::EventQueue do
           queue.subscribe { |e| received_events << e }
         end
 
-        # Give subscriber time to start
-        sleep 0.01
+        # Give subscriber time to start and register
+        sleep 0.05
 
         # Publish event
         queue.publish(event)
 
-        # Give time for event to be processed
-        sleep 0.01
+        # Give more time for event to be processed
+        sleep 0.05
 
         expect(received_events).to include(event)
         
         subscriber_thread.kill
+        subscriber_thread.join(0.1) # Wait for thread to finish
       end
 
       it "does not publish to closed queue" do
@@ -114,7 +115,8 @@ RSpec.describe A2A::Server::Events::EventQueue do
           queue.subscribe(filter) { |e| received_events << e }
         end
 
-        sleep 0.01
+        # Give subscriber time to start and register
+        sleep 0.05
 
         # Publish matching event
         queue.publish(event)
@@ -123,12 +125,14 @@ RSpec.describe A2A::Server::Events::EventQueue do
         other_event = A2A::Server::Events::Event.new(type: "other", data: {})
         queue.publish(other_event)
 
-        sleep 0.01
+        # Give more time for events to be processed
+        sleep 0.05
 
         expect(received_events).to include(event)
         expect(received_events).not_to include(other_event)
         
         subscriber_thread.kill
+        subscriber_thread.join(0.1) # Wait for thread to finish
       end
     end
 
