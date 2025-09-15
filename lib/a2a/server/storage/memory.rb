@@ -106,6 +106,23 @@ module A2A
         end
 
         ##
+        # List tasks with optional filtering
+        #
+        # @param filters [Hash] Optional filters (state, context_id, etc.)
+        # @return [Array<A2A::Types::Task>] Filtered tasks
+        def list_tasks(**filters)
+          @mutex.synchronize do
+            @stats[:reads] += 1
+            tasks = @tasks.values
+
+            tasks = apply_basic_filters(tasks, filters)
+            tasks = apply_metadata_filters(tasks, filters)
+
+            tasks.dup
+          end
+        end
+
+        ##
         # Clear all tasks
         #
         # @return [void]
@@ -213,6 +230,43 @@ module A2A
 
             @stats[:cache_hits].to_f / total_reads
           end
+        end
+
+        private
+
+        def apply_basic_filters(tasks, filters)
+          tasks = tasks.select { |task| task.status&.state == filters[:state] } if filters[:state]
+          tasks = tasks.select { |task| task.context_id == filters[:context_id] } if filters[:context_id]
+          tasks
+        end
+
+        def apply_metadata_filters(tasks, filters)
+          filters.each do |key, value|
+            next if %i[state context_id].include?(key)
+
+            tasks = tasks.select { |task| apply_single_filter(task, key, value) }
+          end
+          tasks
+        end
+
+        def apply_single_filter(task, key, value)
+          case key
+          when :task_type
+            task.metadata&.dig(:type) == value || task.metadata&.dig("type") == value
+          when :created_after
+            created_at = get_created_at(task)
+            created_at && Time.parse(created_at) > value
+          when :created_before
+            created_at = get_created_at(task)
+            created_at && Time.parse(created_at) < value
+          else
+            # Generic metadata filter
+            task.metadata&.dig(key) == value || task.metadata&.dig(key.to_s) == value
+          end
+        end
+
+        def get_created_at(task)
+          task.metadata&.dig(:created_at) || task.metadata&.dig("created_at")
         end
       end
     end

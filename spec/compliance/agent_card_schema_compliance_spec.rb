@@ -77,7 +77,8 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
     let(:base_card) { generate_minimal_agent_card }
 
     it "validates string fields" do
-      string_fields = %i[name description version url preferredTransport]
+      # Test regular string fields
+      string_fields = %i[name description version url]
 
       string_fields.each do |field|
         # Valid string
@@ -88,12 +89,21 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
         invalid_card = base_card.merge(field => 123)
         expect(invalid_card).not_to be_valid_agent_card
       end
+
+      # Test preferredTransport separately with valid transport
+      card = base_card.merge(preferredTransport: "JSONRPC")
+      expect(card).to be_valid_agent_card
+
+      # Invalid non-string preferredTransport
+      invalid_card = base_card.merge(preferredTransport: 123)
+      expect(invalid_card).not_to be_valid_agent_card
     end
 
     it "validates array fields" do
-      array_fields = %i[skills defaultInputModes defaultOutputModes]
-
-      array_fields.each do |field|
+      # Test defaultInputModes and defaultOutputModes with string arrays
+      string_array_fields = %i[defaultInputModes defaultOutputModes]
+      
+      string_array_fields.each do |field|
         # Valid array
         card = base_card.merge(field => %w[item1 item2])
         expect(card).to be_valid_agent_card
@@ -102,6 +112,20 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
         invalid_card = base_card.merge(field => "not an array")
         expect(invalid_card).not_to be_valid_agent_card
       end
+      
+      # Test skills with proper skill objects
+      valid_skills = [
+        { id: "skill1", name: "Skill 1", description: "First skill" },
+        { id: "skill2", name: "Skill 2", description: "Second skill" }
+      ]
+      
+      # Valid skills array
+      card = base_card.merge(skills: valid_skills)
+      expect(card).to be_valid_agent_card
+      
+      # Invalid non-array skills
+      invalid_card = base_card.merge(skills: "not an array")
+      expect(invalid_card).not_to be_valid_agent_card
     end
 
     it "validates object fields" do
@@ -591,7 +615,7 @@ RSpec.describe "Agent Card Schema Compliance", :compliance do
     it "validates metadata object" do
       metadata = {
         createdAt: "2024-01-01T00:00:00Z",
-        updatedAt: Time.current.iso8601,
+        updatedAt: Time.now.utc.iso8601,
         version: "2.1.0",
         environment: "production",
         customField: "custom_value"

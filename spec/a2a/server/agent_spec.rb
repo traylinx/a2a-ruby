@@ -44,7 +44,7 @@ RSpec.describe A2A::Server::Agent do
 
     it "registers capabilities" do
       capabilities = test_agent_class.a2a_capability_registry.all
-      expect(capabilities).to have_at_least(1).item
+      expect(capabilities.size).to be >= 1
 
       echo_capability = capabilities.find { |c| c.name == "echo_capability" }
       expect(echo_capability).not_to be_nil

@@ -4,6 +4,9 @@ require "faraday"
 require "json"
 require "securerandom"
 require_relative "base"
+require_relative "performance_tracker"
+require_relative "json_rpc_handler"
+require_relative "api_methods"
 
 # Try to use connection pooling adapter if available
 begin
@@ -22,6 +25,10 @@ end
 module A2A
   module Client
     class HttpClient < A2A::Client::Base
+      include PerformanceTracker
+      include JsonRpcHandler
+      include ApiMethods
+
       attr_reader :endpoint_url, :connection
 
       ##
@@ -35,67 +42,9 @@ module A2A
         super(config: config, middleware: middleware, consumers: consumers)
         @endpoint_url = endpoint_url.chomp("/")
         @connection = build_connection
-        @request_id_counter = 0
-        @request_id_mutex = Mutex.new
         @connection_pool = nil
-        @performance_stats = {
-          requests_count: 0,
-          total_time: 0.0,
-          avg_response_time: 0.0,
-          cache_hits: 0,
-          cache_misses: 0
-        }
-        @stats_mutex = Mutex.new
-      end
-
-      ##
-      # Send a message to the agent
-      #
-      # @param message [Message, Hash] The message to send
-      # @param context [Hash, nil] Optional context information
-      # @return [Enumerator, Message] Stream of responses or single response
-      def send_message(message, context: nil)
-        message = ensure_message(message)
-
-        if @config.streaming?
-          send_streaming_message(message, context)
-        else
-          send_sync_message(message, context)
-        end
-      end
-
-      ##
-      # Get a task by ID
-      #
-      # @param task_id [String] The task ID
-      # @param context [Hash, nil] Optional context information
-      # @param history_length [Integer, nil] Maximum number of history messages to include
-      # @return [Task] The task
-      def get_task(task_id, context: nil, history_length: nil)
-        params = { id: task_id }
-        params[:historyLength] = history_length if history_length
-
-        request = build_json_rpc_request("tasks/get", params)
-        response = execute_with_middleware(request, context || {}) do |req, _ctx|
-          send_json_rpc_request(req)
-        end
-
-        ensure_task(response["result"])
-      end
-
-      ##
-      # Cancel a task
-      #
-      # @param task_id [String] The task ID to cancel
-      # @param context [Hash, nil] Optional context information
-      # @return [Task] The updated task
-      def cancel_task(task_id, context: nil)
-        request = build_json_rpc_request("tasks/cancel", { id: task_id })
-        response = execute_with_middleware(request, context || {}) do |req, _ctx|
-          send_json_rpc_request(req)
-        end
-
-        ensure_task(response["result"])
+        initialize_performance_tracking
+        initialize_json_rpc_handling
       end
 
       ##
@@ -225,6 +174,96 @@ module A2A
         end
       end
 
+      ##
+      # Set push notification configuration for a task
+      #
+      # @param task_id [String] The task ID
+      # @param config [PushNotificationConfig, Hash] The push notification configuration
+      # @param context [Hash, nil] Optional context information
+      # @return [Hash] The created configuration with ID
+      def set_task_push_notification_config(task_id, config, context: nil)
+        # Validate and normalize config
+        normalized_config = if config.is_a?(A2A::Types::PushNotificationConfig)
+                              config.to_h
+                            elsif config.is_a?(Hash)
+                              # Validate required fields
+                              raise ArgumentError, "config must include 'url'" unless config[:url] || config["url"]
+
+                              config
+                            else
+                              raise ArgumentError, "config must be a Hash or PushNotificationConfig"
+                            end
+
+        params = {
+          taskId: task_id,
+          pushNotificationConfig: normalized_config
+        }
+
+        request = build_json_rpc_request("tasks/pushNotificationConfig/set", params)
+        response = execute_with_middleware(request, context || {}) do |req, _ctx|
+          send_json_rpc_request(req)
+        end
+
+        response["result"]
+      end
+
+      ##
+      # Get push notification configuration for a task
+      #
+      # @param task_id [String] The task ID
+      # @param config_id [String] The push notification config ID
+      # @param context [Hash, nil] Optional context information
+      # @return [Hash] The push notification configuration
+      def get_task_push_notification_config(task_id, config_id, context: nil)
+        params = {
+          taskId: task_id,
+          pushNotificationConfigId: config_id
+        }
+
+        request = build_json_rpc_request("tasks/pushNotificationConfig/get", params)
+        response = execute_with_middleware(request, context || {}) do |req, _ctx|
+          send_json_rpc_request(req)
+        end
+
+        response["result"]
+      end
+
+      ##
+      # List all push notification configurations for a task
+      #
+      # @param task_id [String] The task ID
+      # @param context [Hash, nil] Optional context information
+      # @return [Array<Hash>] List of push notification configurations
+      def list_task_push_notification_configs(task_id, context: nil)
+        request = build_json_rpc_request("tasks/pushNotificationConfig/list", { taskId: task_id })
+        response = execute_with_middleware(request, context || {}) do |req, _ctx|
+          send_json_rpc_request(req)
+        end
+
+        response["result"] || []
+      end
+
+      ##
+      # Delete push notification configuration for a task
+      #
+      # @param task_id [String] The task ID
+      # @param config_id [String] The push notification config ID
+      # @param context [Hash, nil] Optional context information
+      # @return [Boolean] True if deletion was successful
+      def delete_task_push_notification_config(task_id, config_id, context: nil)
+        params = {
+          taskId: task_id,
+          pushNotificationConfigId: config_id
+        }
+
+        request = build_json_rpc_request("tasks/pushNotificationConfig/delete", params)
+        execute_with_middleware(request, context || {}) do |req, _ctx|
+          send_json_rpc_request(req)
+        end
+
+        true
+      end
+
       private
 
       ##
@@ -247,9 +286,8 @@ module A2A
           conn.options.read_timeout = @config.timeout
           conn.options.write_timeout = @config.timeout
 
-          # Performance optimizations
-          conn.options.keep_alive_timeout = 30
-          conn.options.pool_size = @config.pool_size || 5
+          # Performance optimizations (only set if supported)
+          conn.options.pool_size = @config.pool_size || 5 if conn.options.respond_to?(:pool_size=)
 
           # Enable compression if supported
           conn.headers["Accept-Encoding"] = "gzip, deflate"

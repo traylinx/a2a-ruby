@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "rails/engine"
+require_relative "../utils/rails_detection"
 
 ##
 # Rails Engine for A2A integration
@@ -20,6 +21,8 @@ require "rails/engine"
 module A2A
   module Rails
     class Engine < Rails::Engine
+      extend A2A::Utils::RailsDetection
+
       isolate_namespace A2A::Rails
 
       # Configure generators for Rails integration
@@ -97,12 +100,12 @@ module A2A
       # Configure Rails compatibility
       initializer "a2a.rails_compatibility" do |_app|
         # Ensure compatibility with Rails 6.0+
-        if ::Rails.version >= "6.0"
+        if rails_version_supported?
           # Configure zeitwerk autoloading
           config.autoload_paths << File.expand_path("..", __dir__)
 
           # Set up eager loading for production
-          config.eager_load_paths << File.expand_path("..", __dir__) if ::Rails.env.production?
+          config.eager_load_paths << File.expand_path("..", __dir__) if rails_production?
         end
 
         # Configure CSRF protection exemption for A2A endpoints
@@ -147,16 +150,11 @@ module A2A
         require_relative "generators/migration_generator"
       end
 
-      # Check Rails version compatibility
-      def self.rails_version_supported?
-        ::Rails.version >= "6.0"
-      end
-
       # Validate configuration
       def self.validate_configuration!(app)
         unless rails_version_supported?
           raise A2A::Errors::ConfigurationError,
-                "A2A Rails integration requires Rails 6.0 or higher. Current version: #{::Rails.version}"
+                "A2A Rails integration requires Rails 6.0 or higher. Current version: #{rails_version}"
         end
 
         return unless app.config.a2a.enabled && !app.config.a2a.mount_path.start_with?("/")

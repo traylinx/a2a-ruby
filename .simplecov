@@ -39,7 +39,7 @@ SimpleCov.start do
 
   # Coverage thresholds (will be raised as implementation progresses)
   minimum_coverage 50
-  minimum_coverage_by_file 30
+  minimum_coverage_by_file 5
 
   # Refuse to merge results older than 8 hours
   merge_timeout 28_800

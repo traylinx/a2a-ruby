@@ -24,7 +24,18 @@ RSpec.describe A2A::Server::A2AMethods do
       def process_message_async(_message, task, _context)
         # Simulate async processing
         Thread.new do
+          # First transition to WORKING state
+          task_manager.update_task_status(
+            task.id,
+            A2A::Types::TaskStatus.new(
+              state: A2A::Types::TASK_STATE_WORKING,
+              updated_at: Time.now.utc.iso8601
+            )
+          )
+          
           sleep 0.1
+          
+          # Then transition to COMPLETED
           task_manager.update_task_status(
             task.id,
             A2A::Types::TaskStatus.new(
@@ -207,7 +218,15 @@ RSpec.describe A2A::Server::A2AMethods do
         params: { test: true }
       )
 
-      # Complete the task first
+      # Move task to working first, then complete it
+      agent.task_manager.update_task_status(
+        task.id,
+        A2A::Types::TaskStatus.new(
+          state: A2A::Types::TASK_STATE_WORKING,
+          updated_at: Time.now.utc.iso8601
+        )
+      )
+      
       agent.task_manager.update_task_status(
         task.id,
         A2A::Types::TaskStatus.new(

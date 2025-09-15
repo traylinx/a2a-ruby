@@ -259,7 +259,7 @@ RSpec.describe "A2A Test Helpers and Matchers" do
         client = mock_a2a_client(streaming: true)
 
         message = build_message
-        response = client.send_message(message, streaming: true)
+        response = client.send_message(message)
 
         expect(response).to be_streaming_response
       end

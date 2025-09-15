@@ -11,9 +11,10 @@ module A2ATestDoubles
   def mock_a2a_client(**options)
     client = instance_double(A2A::Client::HttpClient)
 
-    # Default responses
-    allow(client).to receive(:send_message) do |message, **opts|
-      if opts[:streaming] || options[:streaming]
+    # Default responses - use correct method signature
+    allow(client).to receive(:send_message) do |message, context: nil|
+      # Check if streaming is enabled in options
+      if options[:streaming]
         create_test_sse_stream(
           build_message(role: "agent", text: "Response to: #{message[:parts]&.first&.dig(:text)}")
         )
@@ -50,11 +51,19 @@ module A2ATestDoubles
     end
 
     allow(client).to receive(:get_task_push_notification_config) do |_task_id, config_id, **_opts|
-      build(:push_notification_config, id: config_id)
+      {
+        id: config_id,
+        url: "https://example.com/webhook",
+        authentication: { type: "bearer", token: "test_token" }
+      }
     end
 
     allow(client).to receive(:list_task_push_notification_configs) do |_task_id, **_opts|
-      [build(:push_notification_config)]
+      [{
+        id: test_uuid,
+        url: "https://example.com/webhook",
+        authentication: { type: "bearer", token: "test_token" }
+      }]
     end
 
     allow(client).to receive(:delete_task_push_notification_config).and_return(true)
@@ -136,10 +145,43 @@ module A2ATestDoubles
     end
 
     allow(task_manager).to receive(:add_task_artifact) do |task_id, artifact|
-      task = get_task(task_id)
+      task = options[:tasks]&.dig(task_id) || build_task(id: task_id)
       task[:artifacts] ||= []
       task[:artifacts] << artifact
+      options[:tasks] ||= {}
+      options[:tasks][task_id] = task
       task
+    end
+
+    # Add missing methods that might be called - use method_missing approach
+    allow(task_manager).to receive(:method_missing) do |method_name, *args, **kwargs|
+      case method_name
+      when :list_tasks
+        tasks = (options[:tasks] || {}).values
+        
+        if kwargs[:state]
+          tasks = tasks.select { |task| 
+            status = task[:status] || task["status"]
+            state = status&.dig(:state) || status&.dig("state")
+            state == kwargs[:state]
+          }
+        end
+
+        if kwargs[:context_id]
+          tasks = tasks.select { |task| 
+            context_id = task[:contextId] || task["contextId"] || task[:context_id] || task["context_id"]
+            context_id == kwargs[:context_id]
+          }
+        end
+
+        tasks
+      when :delete_task
+        task_id = args.first
+        options[:tasks]&.delete(task_id)
+        true
+      else
+        super
+      end
     end
 
     task_manager
@@ -164,27 +206,43 @@ module A2ATestDoubles
     end
 
     allow(storage).to receive(:list_tasks) do |**filters|
-      tasks = data.values
+      tasks = data.values.select { |v| v.is_a?(Hash) && v.key?(:id) }
 
-      tasks = tasks.select { |task| task.dig(:status, :state) == filters[:state] } if filters[:state]
+      if filters[:state]
+        tasks = tasks.select { |task| 
+          status = task[:status] || task["status"]
+          state = status&.dig(:state) || status&.dig("state")
+          state == filters[:state]
+        }
+      end
 
-      tasks = tasks.select { |task| task[:context_id] == filters[:context_id] } if filters[:context_id]
+      if filters[:context_id]
+        tasks = tasks.select { |task| 
+          context_id = task[:contextId] || task["contextId"] || task[:context_id] || task["context_id"]
+          context_id == filters[:context_id]
+        }
+      end
 
       tasks
     end
 
-    allow(storage).to receive(:save_push_notification_config) do |config|
-      config[:id] ||= test_uuid
-      data["pn_#{config[:id]}"] = config
-      config
-    end
-
-    allow(storage).to receive(:get_push_notification_config) do |config_id|
-      data["pn_#{config_id}"]
-    end
-
-    allow(storage).to receive(:delete_push_notification_config) do |config_id|
-      data.delete("pn_#{config_id}")
+    # Handle push notification methods with method_missing
+    allow(storage).to receive(:method_missing) do |method_name, *args, **kwargs|
+      case method_name
+      when :save_push_notification_config
+        config = args.first
+        config[:id] ||= test_uuid
+        data["pn_#{config[:id]}"] = config
+        config
+      when :get_push_notification_config
+        config_id = args.first
+        data["pn_#{config_id}"]
+      when :delete_push_notification_config
+        config_id = args.first
+        data.delete("pn_#{config_id}")
+      else
+        super
+      end
     end
 
     storage
@@ -365,6 +423,52 @@ module A2ATestDoubles
       expect(second_mock).to have_received(second_method).ordered
     end
   end
+
+  # Helper method for deep merging hashes (used in fixture generators)
+  def deep_merge_hash(hash1, hash2)
+    return hash2 if hash1.nil?
+    return hash1 if hash2.nil?
+    
+    result = hash1.dup
+    hash2.each do |key, value|
+      if result[key].is_a?(Hash) && value.is_a?(Hash)
+        result[key] = deep_merge_hash(result[key], value)
+      else
+        result[key] = value
+      end
+    end
+    result
+  end
+end
+
+# Add deep_merge method to Hash class for fixture generators
+class Hash
+  def deep_merge(other_hash)
+    return self if other_hash.nil?
+    
+    result = self.dup
+    other_hash.each do |key, value|
+      if result[key].is_a?(Hash) && value.is_a?(Hash)
+        result[key] = result[key].deep_merge(value)
+      else
+        result[key] = value
+      end
+    end
+    result
+  end
+end
+
+# Add pluck method to Array class for compatibility
+class Array
+  def pluck(key)
+    map { |item| 
+      if item.is_a?(Hash)
+        item[key] || item[key.to_s] || item[key.to_sym]
+      else
+        item.respond_to?(key) ? item.send(key) : nil
+      end
+    }
+  end unless method_defined?(:pluck)
 end
 
 RSpec.configure do |config|

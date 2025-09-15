@@ -2,6 +2,7 @@
 
 require "stringio"
 require "zlib"
+require_relative "performance"
 
 ##
 # Memory-efficient message buffer for handling large messages

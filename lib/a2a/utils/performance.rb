@@ -36,7 +36,7 @@ module A2A
 
           record_performance_data(label, duration, memory_delta)
 
-          if A2A.configuration.performance_logging
+          if A2A.configuration.respond_to?(:performance_logging) && A2A.configuration.performance_logging
             A2A.logger.info("Performance [#{label}]: #{duration.round(4)}s, Memory: #{format_bytes(memory_delta)}")
           end
 

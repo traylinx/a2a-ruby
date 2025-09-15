@@ -307,7 +307,13 @@ module A2A
           listener.call(event)
         rescue StandardError => e
           # Log error but don't stop processing
-          Rails.logger.debug { "Error in event listener: #{e.message}" }
+          logger = if defined?(::Rails) && ::Rails.respond_to?(:logger) && ::Rails.logger
+                     ::Rails.logger
+                   else
+                     require "logger"
+                     Logger.new($stdout)
+                   end
+          logger.debug { "Error in event listener: #{e.message}" }
         end
 
         # Call generic block handler

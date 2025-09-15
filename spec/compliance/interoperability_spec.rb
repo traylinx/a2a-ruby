@@ -190,7 +190,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
             "kind" => "task",
             "status" => {
               "state" => state,
-              "updatedAt" => Time.current.iso8601
+              "updatedAt" => Time.now.utc.iso8601
             }
           }
 
@@ -376,7 +376,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
             "state" => "working",
             "message" => "Processing with Python SDK",
             "progress" => 75,
-            "updatedAt" => Time.current.iso8601
+            "updatedAt" => Time.now.utc.iso8601
           },
           "metadata" => {
             "source" => "python-sdk",
@@ -598,7 +598,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
           "kind" => "task",
           "status" => {
             "state" => "submitted",
-            "updatedAt" => Time.current.iso8601
+            "updatedAt" => Time.now.utc.iso8601
           }
         }
 
@@ -609,7 +609,7 @@ RSpec.describe "A2A Interoperability", :compliance, :interoperability do
           "status" => {
             "state" => "completed",
             "result" => { "processed_by" => "ruby-sdk" },
-            "updatedAt" => Time.current.iso8601
+            "updatedAt" => Time.now.utc.iso8601
           }
         )
 

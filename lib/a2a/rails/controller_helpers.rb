@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "../utils/rails_detection"
+
 module A2A
   module Rails
     ##
@@ -23,6 +25,7 @@ module A2A
     #
     module ControllerHelpers
       extend ActiveSupport::Concern
+      include A2A::Utils::RailsDetection
 
       included do
         # Include the A2A Server Agent functionality
@@ -379,10 +382,11 @@ module A2A
       end
 
       def build_provider_info
+        app = rails_application
         {
-          name: Rails.application.class.module_parent_name,
+          name: app&.class&.module_parent_name || "Unknown",
           version: begin
-            Rails.application.config.version
+            app&.config&.version || "1.0.0"
           rescue StandardError
             "1.0.0"
           end,
@@ -409,7 +413,7 @@ module A2A
         base_metadata = {
           controller: controller_name,
           action: action_name,
-          rails_version: Rails.version,
+          rails_version: rails_version || "unknown",
           created_at: Time.now.iso8601
         }
 
@@ -475,7 +479,7 @@ module A2A
 
       def grpc_port
         # Default gRPC port - applications can override this
-        Rails.env.production? ? 443 : 50_051
+        rails_production? ? 443 : 50_051
       end
 
       # Exception handlers

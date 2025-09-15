@@ -324,7 +324,7 @@ RSpec.describe A2A do
     it "registers a plugin" do
       described_class.register_plugin(:test_transport, TestTransportPlugin)
 
-      expect(A2A::Plugin.registry[:test_transport]).to be_present
+      expect(A2A::Plugin.registry[:test_transport]).not_to be_nil
     end
   end
 

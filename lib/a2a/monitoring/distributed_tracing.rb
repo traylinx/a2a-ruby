@@ -368,7 +368,13 @@ module A2A
           # For now, just log the span if debugging is enabled
           return unless A2A.configuration.debug_tracing
 
-          Rails.logger.debug { "Span: #{to_h.to_json}" }
+          logger = if defined?(::Rails) && ::Rails.respond_to?(:logger) && ::Rails.logger
+                     ::Rails.logger
+                   else
+                     require "logger"
+                     Logger.new($stdout)
+                   end
+          logger.debug { "Span: #{to_h.to_json}" }
         end
       end
 

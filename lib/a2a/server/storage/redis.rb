@@ -151,6 +151,17 @@ module A2A
         end
 
         ##
+        # List tasks with optional filtering
+        #
+        # @param filters [Hash] Optional filters (state, context_id, etc.)
+        # @return [Array<A2A::Types::Task>] Filtered tasks
+        def list_tasks(**filters)
+          tasks = get_base_tasks(filters)
+          tasks = apply_state_filter(tasks, filters)
+          apply_metadata_filters(tasks, filters)
+        end
+
+        ##
         # Clear all tasks
         #
         # @return [void]
@@ -222,8 +233,6 @@ module A2A
           @redis.del(*keys)
         end
 
-        private
-
         ##
         # Build a Redis key for a task
         #
@@ -259,6 +268,51 @@ module A2A
         def deserialize_task(task_data)
           data = JSON.parse(task_data)
           A2A::Types::Task.from_h(data)
+        end
+
+        private
+
+        def get_base_tasks(filters)
+          if filters[:context_id]
+            list_tasks_by_context(filters[:context_id])
+          else
+            list_all_tasks
+          end
+        end
+
+        def apply_state_filter(tasks, filters)
+          return tasks unless filters[:state]
+
+          tasks.select { |task| task.status&.state == filters[:state] }
+        end
+
+        def apply_metadata_filters(tasks, filters)
+          filters.each do |key, value|
+            next if %i[state context_id].include?(key)
+
+            tasks = tasks.select { |task| apply_single_filter(task, key, value) }
+          end
+          tasks
+        end
+
+        def apply_single_filter(task, key, value)
+          case key
+          when :task_type
+            task.metadata&.dig(:type) == value || task.metadata&.dig("type") == value
+          when :created_after
+            created_at = get_created_at(task)
+            created_at && Time.parse(created_at) > value
+          when :created_before
+            created_at = get_created_at(task)
+            created_at && Time.parse(created_at) < value
+          else
+            # Generic metadata filter
+            task.metadata&.dig(key) == value || task.metadata&.dig(key.to_s) == value
+          end
+        end
+
+        def get_created_at(task)
+          task.metadata&.dig(:created_at) || task.metadata&.dig("created_at")
         end
       end
     end

@@ -9,15 +9,20 @@ module A2AMatchers
   RSpec::Matchers.define :be_valid_json_rpc_request do
     match do |actual|
       return false unless actual.is_a?(Hash)
-      return false unless actual["jsonrpc"] == "2.0"
-      return false unless actual["method"].is_a?(String)
+      
+      # Support both string and symbol keys
+      jsonrpc = actual["jsonrpc"] || actual[:jsonrpc]
+      return false unless jsonrpc == "2.0"
+      
+      method_name = actual["method"] || actual[:method]
+      return false unless method_name.is_a?(String)
 
       # id can be string, number, or null (for notifications)
-      id = actual["id"]
+      id = actual["id"] || actual[:id]
       return false unless id.nil? || id.is_a?(String) || id.is_a?(Integer)
 
       # params is optional but must be object or array if present
-      params = actual["params"]
+      params = actual["params"] || actual[:params]
       return false if params && !params.is_a?(Hash) && !params.is_a?(Array)
 
       true
@@ -36,20 +41,30 @@ module A2AMatchers
   RSpec::Matchers.define :be_valid_json_rpc_response do
     match do |actual|
       return false unless actual.is_a?(Hash)
-      return false unless actual["jsonrpc"] == "2.0"
-      return false unless actual.key?("id")
+      
+      # Support both string and symbol keys
+      jsonrpc = actual["jsonrpc"] || actual[:jsonrpc]
+      return false unless jsonrpc == "2.0"
+      
+      # Must have id field (can be null)
+      has_id = actual.key?("id") || actual.key?(:id)
+      return false unless has_id
 
       # Must have either result or error, but not both
-      has_result = actual.key?("result")
-      has_error = actual.key?("error")
+      has_result = actual.key?("result") || actual.key?(:result)
+      has_error = actual.key?("error") || actual.key?(:error)
       return false unless has_result ^ has_error
 
       # If error, validate error structure
       if has_error
-        error = actual["error"]
+        error = actual["error"] || actual[:error]
         return false unless error.is_a?(Hash)
-        return false unless error["code"].is_a?(Integer)
-        return false unless error["message"].is_a?(String)
+        
+        error_code = error["code"] || error[:code]
+        return false unless error_code.is_a?(Integer)
+        
+        error_message = error["message"] || error[:message]
+        return false unless error_message.is_a?(String)
       end
 
       true
@@ -65,22 +80,45 @@ module A2AMatchers
     match do |actual|
       return false unless actual.is_a?(Hash)
 
-      # Required fields
+      # Required fields - support both string and symbol keys
       required_fields = %w[name description version url preferredTransport skills capabilities defaultInputModes
                            defaultOutputModes]
-      return false unless required_fields.all? { |field| actual.key?(field) }
+      return false unless required_fields.all? { |field| actual.key?(field) || actual.key?(field.to_sym) }
+
+      # Validate string fields
+      string_fields = %w[name description version url preferredTransport]
+      string_fields.each do |field|
+        value = actual[field] || actual[field.to_sym]
+        return false unless value.is_a?(String)
+      end
 
       # Validate skills array
-      skills = actual["skills"]
+      skills = actual["skills"] || actual[:skills]
       return false unless skills.is_a?(Array)
       return false unless skills.all? { |skill| valid_skill?(skill) }
 
       # Validate capabilities
-      capabilities = actual["capabilities"]
+      capabilities = actual["capabilities"] || actual[:capabilities]
       return false unless capabilities.is_a?(Hash)
 
+      # Validate defaultInputModes array
+      default_input_modes = actual["defaultInputModes"] || actual[:defaultInputModes]
+      return false unless default_input_modes.is_a?(Array)
+
+      # Validate defaultOutputModes array
+      default_output_modes = actual["defaultOutputModes"] || actual[:defaultOutputModes]
+      return false unless default_output_modes.is_a?(Array)
+
       # Validate transport
-      return false unless A2A::Types::VALID_TRANSPORTS.include?(actual["preferredTransport"])
+      preferred_transport = actual["preferredTransport"] || actual[:preferredTransport]
+      return false unless A2A::Types::VALID_TRANSPORTS.include?(preferred_transport)
+
+      # Validate additional interfaces if present
+      additional_interfaces = actual["additionalInterfaces"] || actual[:additionalInterfaces]
+      if additional_interfaces
+        return false unless additional_interfaces.is_a?(Array)
+        return false unless additional_interfaces.all? { |interface| valid_interface?(interface) }
+      end
 
       true
     end
@@ -95,7 +133,21 @@ module A2AMatchers
       return false unless skill.is_a?(Hash)
 
       required_fields = %w[id name description]
-      required_fields.all? { |field| skill.key?(field) }
+      required_fields.all? { |field| skill.key?(field) || skill.key?(field.to_sym) }
+    end
+
+    def valid_interface?(interface)
+      return false unless interface.is_a?(Hash)
+
+      # Required fields
+      transport = interface["transport"] || interface[:transport]
+      url = interface["url"] || interface[:url]
+      
+      return false unless transport.is_a?(String)
+      return false unless url.is_a?(String)
+      return false unless A2A::Types::VALID_TRANSPORTS.include?(transport)
+
+      true
     end
   end
 
@@ -104,18 +156,20 @@ module A2AMatchers
     match do |actual|
       return false unless actual.is_a?(Hash)
 
-      # Required fields
+      # Required fields - support both string and symbol keys
       required_fields = %w[messageId role kind parts]
-      return false unless required_fields.all? { |field| actual.key?(field) }
+      return false unless required_fields.all? { |field| actual.key?(field) || actual.key?(field.to_sym) }
 
       # Validate role
-      return false unless A2A::Types::VALID_ROLES.include?(actual["role"])
+      role = actual["role"] || actual[:role]
+      return false unless A2A::Types::VALID_ROLES.include?(role)
 
       # Validate kind
-      return false unless actual["kind"] == "message"
+      kind = actual["kind"] || actual[:kind]
+      return false unless kind == "message"
 
       # Validate parts
-      parts = actual["parts"]
+      parts = actual["parts"] || actual[:parts]
       return false unless parts.is_a?(Array)
       return false if parts.empty?
       return false unless parts.all? { |part| valid_part?(part) }
@@ -129,16 +183,19 @@ module A2AMatchers
 
     def valid_part?(part)
       return false unless part.is_a?(Hash)
-      return false unless part.key?("kind")
-      return false unless A2A::Types::VALID_PART_KINDS.include?(part["kind"])
+      
+      # Support both string and symbol keys
+      kind = part["kind"] || part[:kind]
+      return false unless kind
+      return false unless A2A::Types::VALID_PART_KINDS.include?(kind)
 
-      case part["kind"]
+      case kind
       when "text"
-        part.key?("text")
+        part.key?("text") || part.key?(:text)
       when "file"
-        part.key?("file")
+        part.key?("file") || part.key?(:file)
       when "data"
-        part.key?("data")
+        part.key?("data") || part.key?(:data)
       else
         false
       end
@@ -150,18 +207,21 @@ module A2AMatchers
     match do |actual|
       return false unless actual.is_a?(Hash)
 
-      # Required fields
+      # Required fields - support both string and symbol keys
       required_fields = %w[id contextId kind status]
-      return false unless required_fields.all? { |field| actual.key?(field) }
+      return false unless required_fields.all? { |field| actual.key?(field) || actual.key?(field.to_sym) }
 
       # Validate kind
-      return false unless actual["kind"] == "task"
+      kind = actual["kind"] || actual[:kind]
+      return false unless kind == "task"
 
       # Validate status
-      status = actual["status"]
+      status = actual["status"] || actual[:status]
       return false unless status.is_a?(Hash)
-      return false unless status.key?("state")
-      return false unless A2A::Types::VALID_TASK_STATES.include?(status["state"])
+      
+      state = status["state"] || status[:state]
+      return false unless state
+      return false unless A2A::Types::VALID_TASK_STATES.include?(state)
 
       true
     end
@@ -176,15 +236,17 @@ module A2AMatchers
     match do |actual|
       return false unless actual.is_a?(Hash)
 
-      # Required fields
+      # Required fields - support both string and symbol keys
       required_fields = %w[taskId contextId status]
-      return false unless required_fields.all? { |field| actual.key?(field) }
+      return false unless required_fields.all? { |field| actual.key?(field) || actual.key?(field.to_sym) }
 
       # Validate status
-      status = actual["status"]
+      status = actual["status"] || actual[:status]
       return false unless status.is_a?(Hash)
-      return false unless status.key?("state")
-      return false unless A2A::Types::VALID_TASK_STATES.include?(status["state"])
+      
+      state = status["state"] || status[:state]
+      return false unless state
+      return false unless A2A::Types::VALID_TASK_STATES.include?(state)
 
       true
     end
@@ -199,16 +261,20 @@ module A2AMatchers
     match do |actual|
       return false unless actual.is_a?(Hash)
 
-      # Required fields
+      # Required fields - support both string and symbol keys
       required_fields = %w[taskId contextId artifact]
-      return false unless required_fields.all? { |field| actual.key?(field) }
+      return false unless required_fields.all? { |field| actual.key?(field) || actual.key?(field.to_sym) }
 
       # Validate artifact
-      artifact = actual["artifact"]
+      artifact = actual["artifact"] || actual[:artifact]
       return false unless artifact.is_a?(Hash)
-      return false unless artifact.key?("artifactId")
-      return false unless artifact.key?("parts")
-      return false unless artifact["parts"].is_a?(Array)
+      
+      artifact_id = artifact["artifactId"] || artifact[:artifactId]
+      return false unless artifact_id
+      
+      parts = artifact["parts"] || artifact[:parts]
+      return false unless parts
+      return false unless parts.is_a?(Array)
 
       true
     end
@@ -222,17 +288,23 @@ module A2AMatchers
   RSpec::Matchers.define :have_json_rpc_error do |expected_code|
     match do |actual|
       return false unless actual.is_a?(Hash)
-      return false unless actual.key?("error")
+      
+      # Support both string and symbol keys
+      has_error = actual.key?("error") || actual.key?(:error)
+      return false unless has_error
 
-      error = actual["error"]
+      error = actual["error"] || actual[:error]
       return false unless error.is_a?(Hash)
-      return false unless error["code"] == expected_code
+      
+      error_code = error["code"] || error[:code]
+      return false unless error_code == expected_code
 
       true
     end
 
     failure_message do |actual|
-      error_code = actual.dig("error", "code")
+      error_code = (actual["error"] || actual[:error])&.dig("code") || 
+                   (actual["error"] || actual[:error])&.dig(:code)
       "expected JSON-RPC error with code #{expected_code}, got #{error_code}"
     end
   end
@@ -241,11 +313,16 @@ module A2AMatchers
   RSpec::Matchers.define :have_a2a_error do |expected_code|
     match do |actual|
       return false unless actual.is_a?(Hash)
-      return false unless actual.key?("error")
+      
+      # Support both string and symbol keys
+      has_error = actual.key?("error") || actual.key?(:error)
+      return false unless has_error
 
-      error = actual["error"]
+      error = actual["error"] || actual[:error]
       return false unless error.is_a?(Hash)
-      return false unless error["code"] == expected_code
+      
+      error_code = error["code"] || error[:code]
+      return false unless error_code == expected_code
 
       # Verify it's an A2A error code (in the -32001 to -32010 range)
       return false unless (-32_010..-32_001).cover?(expected_code)
@@ -254,7 +331,8 @@ module A2AMatchers
     end
 
     failure_message do |actual|
-      error_code = actual.dig("error", "code")
+      error_code = (actual["error"] || actual[:error])&.dig("code") || 
+                   (actual["error"] || actual[:error])&.dig(:code)
       "expected A2A error with code #{expected_code}, got #{error_code}"
     end
   end
@@ -294,15 +372,17 @@ module A2AMatchers
     match do |actual|
       return false unless actual.is_a?(Hash)
 
-      # Required fields
-      return false unless actual.key?("url")
-      return false unless actual["url"].is_a?(String)
+      # Required fields - support both string and symbol keys
+      url = actual["url"] || actual[:url]
+      return false unless url
+      return false unless url.is_a?(String)
 
       # Optional fields validation
-      return false if actual.key?("id") && !actual["id"].is_a?(String)
+      id = actual["id"] || actual[:id]
+      return false if id && !id.is_a?(String)
 
-      if actual.key?("authentication")
-        auth = actual["authentication"]
+      auth = actual["authentication"] || actual[:authentication]
+      if auth
         return false unless auth.is_a?(Hash)
       end
 

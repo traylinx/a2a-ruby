@@ -313,7 +313,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           kind: "text",
           text: "Hello",
           metadata: {
-            timestamp: Time.current.iso8601,
+            timestamp: Time.now.utc.iso8601,
             source: "user_input",
             confidence: 0.95
           }
@@ -334,7 +334,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           kind: "task",
           status: {
             state: "submitted",
-            updatedAt: Time.current.iso8601
+            updatedAt: Time.now.utc.iso8601
           }
         }
 
@@ -365,7 +365,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
             message: "Task completed successfully",
             progress: 100,
             result: { output: "success" },
-            updatedAt: Time.current.iso8601
+            updatedAt: Time.now.utc.iso8601
           },
           artifacts: [
             {
@@ -388,7 +388,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           state: "working",
           message: "Processing request",
           progress: 50,
-          updatedAt: Time.current.iso8601
+          updatedAt: Time.now.utc.iso8601
         }
 
         task = build_task(status: status)
@@ -402,7 +402,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
             summary: "Analysis complete",
             data: { items: 42 }
           },
-          updatedAt: Time.current.iso8601
+          updatedAt: Time.now.utc.iso8601
         }
 
         task = build_task(status: status)
@@ -417,7 +417,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
             message: "Failed to process input",
             details: { step: "validation" }
           },
-          updatedAt: Time.current.iso8601
+          updatedAt: Time.now.utc.iso8601
         }
 
         task = build_task(status: status)
@@ -439,7 +439,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
       end
 
       it "validates required fields" do
-        required_fields = %w[
+        required_fields = %i[
           name description version url preferredTransport
           skills capabilities defaultInputModes defaultOutputModes
         ]
@@ -561,7 +561,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
           status: {
             state: "working",
             progress: 25,
-            updatedAt: Time.current.iso8601
+            updatedAt: Time.now.utc.iso8601
           }
         }
 
@@ -628,7 +628,7 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
       extension = {
         uri: "https://example.com/extensions/timestamp/v1",
         data: {
-          clientTimestamp: Time.current.iso8601,
+          clientTimestamp: Time.now.utc.iso8601,
           timezone: "UTC"
         }
       }

@@ -14,7 +14,7 @@ module A2AHelpers
 
   # Generate an ISO8601 timestamp for testing
   def test_timestamp
-    Time.current.iso8601
+    Time.now.utc.iso8601
   end
 
   # Generate test authentication token
@@ -95,7 +95,7 @@ module A2AHelpers
       kind: "task",
       status: {
         state: state,
-        updatedAt: Time.current.iso8601
+        updatedAt: Time.now.utc.iso8601
       }
     }.merge(overrides)
   end
@@ -107,7 +107,7 @@ module A2AHelpers
       contextId: context_id,
       status: {
         state: state,
-        updatedAt: Time.current.iso8601
+        updatedAt: Time.now.utc.iso8601
       }
     }.merge(overrides)
   end
@@ -138,9 +138,15 @@ module A2AHelpers
     allow(client).to receive_messages(send_message: build_message(role: "agent"), get_task: build_task,
                                       cancel_task: build_task(state: "canceled"), get_card: build_agent_card)
 
-    # Override with custom responses
+    # Override with custom responses - only for valid methods
+    valid_methods = [:send_message, :get_task, :cancel_task, :get_card, :resubscribe, 
+                     :set_task_push_notification_config, :get_task_push_notification_config,
+                     :list_task_push_notification_configs, :delete_task_push_notification_config]
+    
     responses.each do |method, response|
-      allow(client).to receive(method).and_return(response)
+      if valid_methods.include?(method.to_sym)
+        allow(client).to receive(method).and_return(response)
+      end
     end
 
     client
@@ -209,27 +215,52 @@ module A2AHelpers
 
   # Validate JSON-RPC 2.0 request structure
   def validate_json_rpc_request(request)
-    expect(request).to be_valid_json_rpc_request
+    begin
+      expect(request).to be_valid_json_rpc_request
+    rescue RSpec::Expectations::ExpectationNotMetError => e
+      raise RSpec::Expectations::ExpectationNotMetError, 
+            "JSON-RPC request validation failed: #{e.message}\nRequest: #{request.inspect}"
+    end
   end
 
   # Validate JSON-RPC 2.0 response structure
   def validate_json_rpc_response(response)
-    expect(response).to be_valid_json_rpc_response
+    begin
+      expect(response).to be_valid_json_rpc_response
+    rescue RSpec::Expectations::ExpectationNotMetError => e
+      raise RSpec::Expectations::ExpectationNotMetError, 
+            "JSON-RPC response validation failed: #{e.message}\nResponse: #{response.inspect}"
+    end
   end
 
   # Validate A2A agent card structure
   def validate_agent_card(card)
-    expect(card).to be_valid_agent_card
+    begin
+      expect(card).to be_valid_agent_card
+    rescue RSpec::Expectations::ExpectationNotMetError => e
+      raise RSpec::Expectations::ExpectationNotMetError, 
+            "Agent card validation failed: #{e.message}\nCard: #{card.inspect}"
+    end
   end
 
   # Validate A2A message structure
   def validate_a2a_message(message)
-    expect(message).to be_valid_a2a_message
+    begin
+      expect(message).to be_valid_a2a_message
+    rescue RSpec::Expectations::ExpectationNotMetError => e
+      raise RSpec::Expectations::ExpectationNotMetError, 
+            "A2A message validation failed: #{e.message}\nMessage: #{message.inspect}"
+    end
   end
 
   # Validate A2A task structure
   def validate_a2a_task(task)
-    expect(task).to be_valid_a2a_task
+    begin
+      expect(task).to be_valid_a2a_task
+    rescue RSpec::Expectations::ExpectationNotMetError => e
+      raise RSpec::Expectations::ExpectationNotMetError, 
+            "A2A task validation failed: #{e.message}\nTask: #{task.inspect}"
+    end
   end
 
   # Test server helpers
@@ -271,10 +302,11 @@ module A2AHelpers
   # Create JWT test token
   def create_jwt_token(payload: {}, secret: nil)
     secret ||= "test_secret_#{SecureRandom.hex(32)}"
+    now = Time.now
     default_payload = {
       sub: "test_user",
-      iat: Time.current.to_i,
-      exp: 1.hour.from_now.to_i
+      iat: now.to_i,
+      exp: (now + 3600).to_i  # 1 hour from now
     }
 
     # Simple JWT creation for testing (in real implementation, use JWT gem)
@@ -356,9 +388,9 @@ module A2AHelpers
 
   # Measure execution time
   def measure_time
-    start_time = Time.current
+    start_time = Time.now
     result = yield
-    end_time = Time.current
+    end_time = Time.now
 
     {
       result: result,
@@ -401,12 +433,12 @@ module A2AHelpers
   end
 
   # Load testing helper
-  def load_test(duration: 5.seconds, concurrent_requests: 10, &block)
-    start_time = Time.current
+  def load_test(duration: 5, concurrent_requests: 10, &block)  # duration in seconds
+    start_time = Time.now
     end_time = start_time + duration
     results = []
 
-    while Time.current < end_time
+    while Time.now < end_time
       batch_results = run_concurrently(thread_count: concurrent_requests, &block)
       results.concat(batch_results)
       sleep(0.1) # Small delay between batches

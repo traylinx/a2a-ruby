@@ -67,6 +67,16 @@ module A2A
         end
 
         ##
+        # List tasks with optional filtering
+        #
+        # @param filters [Hash] Optional filters (state, context_id, etc.)
+        # @return [Array<A2A::Types::Task>] Filtered tasks
+        # @raise [NotImplementedError] Must be implemented by subclasses
+        def list_tasks(**filters)
+          raise NotImplementedError, "#{self.class} must implement #list_tasks"
+        end
+
+        ##
         # Check if a task exists
         #
         # @param task_id [String] The task ID

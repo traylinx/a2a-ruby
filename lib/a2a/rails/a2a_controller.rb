@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "../utils/rails_detection"
+
 ##
 # Main controller for A2A Rails engine
 #
@@ -10,6 +12,7 @@ module A2A
   module Rails
     class A2aController < ApplicationController
       include A2A::Rails::ControllerHelpers
+      include A2A::Utils::RailsDetection
 
       # Skip CSRF protection for A2A endpoints
       skip_before_action :verify_authenticity_token
@@ -83,7 +86,7 @@ module A2A
           status: "healthy",
           version: A2A::VERSION,
           timestamp: Time.now.iso8601,
-          rails_version: ::Rails.version
+          rails_version: rails_version || "unknown"
         }
       end
 

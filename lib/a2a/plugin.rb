@@ -125,12 +125,15 @@ module A2A
 
       # Register a hook
       # @param event [Symbol] Hook event name
-      # @param callable [Proc, Method] Hook handler
+      # @param callable [Proc, Method] Hook handler (optional if block given)
       # @param priority [Integer] Hook priority (lower = higher priority)
-      def add_hook(event, callable, priority: 50)
+      def add_hook(event, callable = nil, priority: 50, &block)
         initialize! unless @hooks
 
-        @hooks[event] << { callable: callable, priority: priority }
+        handler = callable || block
+        raise ArgumentError, "Must provide callable or block" unless handler
+
+        @hooks[event] << { callable: handler, priority: priority }
         @hooks[event].sort_by! { |hook| hook[:priority] }
       end
 
@@ -194,7 +197,7 @@ module A2A
           if type
             @plugin_type = type
           else
-            @plugin_type
+            @plugin_type || (superclass.respond_to?(:plugin_type) ? superclass.plugin_type : nil)
           end
         end
 
@@ -208,6 +211,15 @@ module A2A
         # @return [Array<Symbol>]
         def dependencies
           @dependencies || []
+        end
+
+        # Inherited hook to ensure plugin types are properly inherited
+        def inherited(subclass)
+          super
+          # Ensure subclass inherits plugin type if not explicitly set
+          return unless @plugin_type && !subclass.instance_variable_defined?(:@plugin_type)
+
+          subclass.instance_variable_set(:@plugin_type, @plugin_type)
         end
       end
 

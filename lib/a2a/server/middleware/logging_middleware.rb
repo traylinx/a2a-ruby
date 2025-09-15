@@ -2,6 +2,7 @@
 
 require "logger"
 require "json"
+require_relative "../../utils/rails_detection"
 
 ##
 # Logging middleware for A2A requests
@@ -21,6 +22,8 @@ module A2A
   module Server
     module Middleware
       class LoggingMiddleware
+        include A2A::Utils::RailsDetection
+
         attr_accessor :logger
         attr_reader :level, :format, :options
 
@@ -121,8 +124,8 @@ module A2A
         ##
         # Get default logger
         def default_logger
-          if defined?(Rails) && Rails.logger
-            Rails.logger
+          if rails_logger
+            rails_logger
           else
             Logger.new($stdout).tap do |logger|
               logger.level = Logger::INFO

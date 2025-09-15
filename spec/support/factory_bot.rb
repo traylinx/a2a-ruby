@@ -47,14 +47,14 @@ FactoryBot.define do
     id { SecureRandom.uuid }
     context_id { SecureRandom.uuid }
     kind { "task" }
-    status { { state: "submitted", updatedAt: Time.current.iso8601 } }
+    status { { state: "submitted", updatedAt: Time.now.utc.iso8601 } }
 
     trait :working do
-      status { { state: "working", updatedAt: Time.current.iso8601 } }
+      status { { state: "working", updatedAt: Time.now.utc.iso8601 } }
     end
 
     trait :completed do
-      status { { state: "completed", updatedAt: Time.current.iso8601 } }
+      status { { state: "completed", updatedAt: Time.now.utc.iso8601 } }
     end
 
     trait :with_history do
@@ -144,10 +144,10 @@ FactoryBot.define do
   factory :task_status_update_event, class: Hash do
     task_id { SecureRandom.uuid }
     context_id { SecureRandom.uuid }
-    status { { state: "working", updatedAt: Time.current.iso8601 } }
+    status { { state: "working", updatedAt: Time.now.utc.iso8601 } }
 
     trait :completed do
-      status { { state: "completed", updatedAt: Time.current.iso8601 } }
+      status { { state: "completed", updatedAt: Time.now.utc.iso8601 } }
     end
 
     trait :failed do
@@ -155,7 +155,7 @@ FactoryBot.define do
         {
           state: "failed",
           error: "Task execution failed",
-          updatedAt: Time.current.iso8601
+          updatedAt: Time.now.utc.iso8601
         }
       end
     end

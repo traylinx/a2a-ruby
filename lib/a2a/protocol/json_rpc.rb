@@ -84,19 +84,22 @@ module A2A
       # @param error [Hash, nil] The error object (mutually exclusive with result)
       # @param id [String, Integer, nil] The request ID
       # @return [Hash] The response hash
-      def self.build_response(id:, result: nil, error: nil)
-        raise ArgumentError, "Cannot specify both result and error" if result && error
-        raise ArgumentError, "Must specify either result or error" unless result || error
+      def self.build_response(id:, **kwargs)
+        result_provided = kwargs.key?(:result)
+        error_provided = kwargs.key?(:error)
+
+        raise ArgumentError, "Cannot specify both result and error" if result_provided && error_provided
+        raise ArgumentError, "Must specify either result or error" unless result_provided || error_provided
 
         response = {
           jsonrpc: JSONRPC_VERSION,
           id: id
         }
 
-        if error
-          response[:error] = normalize_error(error)
+        if error_provided
+          response[:error] = normalize_error(kwargs[:error])
         else
-          response[:result] = result
+          response[:result] = kwargs[:result]
         end
 
         response

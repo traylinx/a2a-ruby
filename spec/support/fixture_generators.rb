@@ -124,7 +124,7 @@ module A2AFixtureGenerators
 
       metadata: {
         createdAt: "2024-01-01T00:00:00Z",
-        updatedAt: Time.current.iso8601,
+        updatedAt: test_timestamp,
         version: "2.1.0",
         environment: "production"
       }
@@ -162,7 +162,7 @@ module A2AFixtureGenerators
           kind: "text",
           text: "Please analyze this document and the attached image:",
           metadata: {
-            timestamp: Time.current.iso8601,
+            timestamp: test_timestamp,
             source: "user_input"
           }
         },
@@ -176,7 +176,7 @@ module A2AFixtureGenerators
           },
           metadata: {
             fileSize: 1024,
-            uploadedAt: Time.current.iso8601
+            uploadedAt: test_timestamp
           }
         },
         {
@@ -215,7 +215,7 @@ module A2AFixtureGenerators
         {
           uri: "https://example.com/extensions/timestamp/v1",
           data: {
-            clientTimestamp: Time.current.iso8601,
+            clientTimestamp: test_timestamp,
             timezone: "UTC"
           }
         }
@@ -285,7 +285,7 @@ module A2AFixtureGenerators
           processingTime: 45.2,
           itemsProcessed: 150
         },
-        updatedAt: Time.current.iso8601
+        updatedAt: test_timestamp
       },
 
       artifacts: [
@@ -314,7 +314,7 @@ module A2AFixtureGenerators
             }
           ],
           metadata: {
-            generatedAt: Time.current.iso8601,
+            generatedAt: test_timestamp,
             version: "1.0",
             format: "mixed"
           }
@@ -347,13 +347,13 @@ module A2AFixtureGenerators
           parts: [
             { kind: "text", text: "I'll analyze the document for you." }
           ],
-          metadata: { timestamp: Time.current.iso8601 }
+          metadata: { timestamp: test_timestamp }
         }
       ],
 
       metadata: {
-        createdAt: 1.hour.ago.iso8601,
-        updatedAt: Time.current.iso8601,
+        createdAt: (Time.now - 3600).utc.iso8601,  # 1 hour ago
+        updatedAt: test_timestamp,
         priority: "high",
         estimatedDuration: 60,
         actualDuration: 45.2,
@@ -378,11 +378,11 @@ module A2AFixtureGenerators
           state: state,
           message: "Task is #{state}",
           progress: (index + 1) * 33,
-          updatedAt: (Time.current + index.minutes).iso8601
+          updatedAt: test_timestamp
         },
         metadata: {
           eventIndex: index,
-          timestamp: (Time.current + index.minutes).iso8601
+          timestamp: test_timestamp
         }
       }
     end
@@ -451,7 +451,7 @@ module A2AFixtureGenerators
           credentials: "webhook_token_#{i}"
         },
         metadata: {
-          createdAt: Time.current.iso8601,
+          createdAt: test_timestamp,
           description: "Webhook endpoint #{i}",
           retryPolicy: {
             maxRetries: 3,
@@ -584,7 +584,7 @@ module A2AFixtureGenerators
       metadata: {
         size: size,
         characterCount: text_content.length,
-        generatedAt: Time.current.iso8601
+        generatedAt: test_timestamp
       }
     }
   end

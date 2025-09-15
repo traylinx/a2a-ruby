@@ -2,6 +2,7 @@
 
 require "securerandom"
 require_relative "storage"
+require_relative "../utils/performance"
 
 ##
 # Manages task lifecycle, state transitions, and event processing
@@ -228,6 +229,18 @@ module A2A
       end
 
       ##
+      # Add an artifact to a task (alias for add_artifact for compatibility)
+      #
+      # @param task_id [String] The task ID
+      # @param artifact [A2A::Types::Artifact] The artifact to add
+      # @param append [Boolean] Whether to append to existing artifact with same ID
+      # @return [A2A::Types::Task] The updated task
+      # @raise [A2A::Errors::TaskNotFound] If task doesn't exist
+      def add_task_artifact(task_id, artifact, append: false)
+        add_artifact(task_id, artifact, append: append)
+      end
+
+      ##
       # Add a message to task history
       #
       # @param task_id [String] The task ID
@@ -425,7 +438,8 @@ module A2A
           return nil unless entry
 
           # Check TTL
-          if Time.now - entry[:timestamp] > @config[:cache_ttl]
+          cache_ttl = @config[:cache_ttl] || 300
+          if Time.now - entry[:timestamp] > cache_ttl
             @task_cache.delete(task_id)
             return nil
           end
@@ -442,7 +456,8 @@ module A2A
       def add_to_cache(task_id, task)
         @cache_mutex.synchronize do
           # Evict oldest entries if cache is full
-          if @task_cache.size >= @config[:cache_size]
+          cache_size = @config[:cache_size] || 1000
+          if @task_cache.size >= cache_size
             oldest_key = @task_cache.min_by { |_, entry| entry[:timestamp] }.first
             @task_cache.delete(oldest_key)
           end

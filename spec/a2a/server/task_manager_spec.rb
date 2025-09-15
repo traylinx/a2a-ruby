@@ -139,13 +139,13 @@ RSpec.describe A2A::Server::TaskManager do
     end
 
     it "emits status update event" do
+      # Ensure task is created first
+      task_id = task.id
+      
       events = []
       task_manager.add_event_handler { |type, data| events << [type, data] }
 
-      # Clear creation event
-      events.clear
-
-      task_manager.update_task_status(task.id, { state: A2A::Types::TASK_STATE_WORKING })
+      task_manager.update_task_status(task_id, { state: A2A::Types::TASK_STATE_WORKING })
 
       expect(events.length).to eq(1)
       expect(events[0][0]).to eq("task_status_update")
@@ -164,7 +164,8 @@ RSpec.describe A2A::Server::TaskManager do
     end
 
     it "raises error for non-cancelable task" do
-      # Complete the task first
+      # Complete the task first (need to go through valid state transitions)
+      task_manager.update_task_status(task.id, { state: A2A::Types::TASK_STATE_WORKING })
       task_manager.update_task_status(task.id, { state: A2A::Types::TASK_STATE_COMPLETED })
 
       expect do
@@ -214,7 +215,7 @@ RSpec.describe A2A::Server::TaskManager do
 
       task_manager.add_artifact(task.id, artifact)
 
-      artifact_events = events.slice("task_artifact_update")
+      artifact_events = events.select { |event| event[0] == "task_artifact_update" }
       expect(artifact_events.length).to eq(1)
       expect(artifact_events[0][1]).to be_a(A2A::Types::TaskArtifactUpdateEvent)
       expect(artifact_events[0][1].artifact.artifact_id).to eq("test-artifact")

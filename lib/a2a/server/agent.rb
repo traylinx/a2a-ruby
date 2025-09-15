@@ -360,9 +360,9 @@ module A2A
       ##
       # Set the method name for this capability
       #
-      # @param method_name [String] The A2A method name
+      # @param method_name [String, Symbol] The A2A method name
       def method(method_name)
-        @attributes[:method] = method_name
+        @attributes[:method] = method_name.to_s
       end
 
       ##
