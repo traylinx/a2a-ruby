@@ -19,6 +19,8 @@ require_relative "a2a/protocol/agent_card_server"
 # Server components (Task 5 - Server-Side Components)
 require_relative "a2a/server/agent"
 require_relative "a2a/server/handler"
+require_relative "a2a/server/request_handler"
+require_relative "a2a/server/default_request_handler"
 require_relative "a2a/server/middleware"
 require_relative "a2a/server/task_manager"
 require_relative "a2a/server/push_notification_manager"

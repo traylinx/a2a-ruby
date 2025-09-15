@@ -146,6 +146,13 @@ module A2A
       end
     end
 
+    # Unsupported operation
+    class UnsupportedOperation < A2AError
+      def initialize(message = "Operation not supported", **options)
+        super(message, code: -32_011, **options)
+      end
+    end
+
     # Not found (generic)
     class NotFound < A2AError
       def initialize(message = "Not found", **options)
