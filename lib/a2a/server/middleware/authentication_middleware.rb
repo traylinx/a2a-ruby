@@ -3,6 +3,13 @@
 require "base64"
 require_relative "../../errors"
 
+module A2A
+  module Server
+    module Middleware
+    end
+  end
+end
+
 ##
 # Authentication middleware for A2A requests
 #

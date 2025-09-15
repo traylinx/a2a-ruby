@@ -2,6 +2,11 @@
 
 require "securerandom"
 
+module A2A
+  module Monitoring
+  end
+end
+
 ##
 # Distributed tracing implementation for A2A operations
 #

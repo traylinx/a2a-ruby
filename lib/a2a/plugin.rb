@@ -336,4 +336,5 @@ end
 ##
 # Plugin-related errors
 #
-class A2A::Errors::PluginErrorend
+class A2A::Errors::PluginError < A2A::Errors::A2AError
+end

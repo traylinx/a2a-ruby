@@ -6,7 +6,7 @@
 # Artifacts are outputs or intermediate results produced by agents during task execution.
 # They can contain multiple parts (text, files, or data) and have associated metadata.
 #
-class A2A::Types::Artifact < BaseModel
+class A2A::Types::Artifact < A2A::Types::BaseModel
   attr_reader :artifact_id, :name, :description, :parts, :metadata, :extensions
 
   ##

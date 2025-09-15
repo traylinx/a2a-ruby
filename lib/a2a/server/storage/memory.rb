@@ -7,7 +7,7 @@
 # It's suitable for development, testing, and single-process deployments
 # where persistence across restarts is not required.
 #
-class A2A::Server::Storage::Memory < Base
+class A2A::Server::Storage::Memory < A2A::Server::Storage::Base
   ##
   # Initialize the memory storage with performance optimizations
   def initialize

@@ -251,7 +251,9 @@ class A2A::Server::TaskManager
   #
   # @param context_id [String] The context ID
   # @return [Array<A2A::Types::Task>] Tasks in the context
-  delegate :list_tasks_by_context, to: :@storage
+  def list_tasks_by_context(*args)
+    @storage.list_tasks_by_context(*args)
+  end
 
   ##
   # Add an event handler

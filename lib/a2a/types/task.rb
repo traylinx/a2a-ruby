@@ -7,7 +7,7 @@ module A2A::Types
   # A task represents a unit of work that can be executed by an agent.
   # It includes status information, artifacts, message history, and metadata.
   #
-  class Task < BaseModel
+  class Task < A2A::Types::BaseModel
     attr_reader :id, :context_id, :kind, :status, :artifacts, :history, :metadata
 
     ##
@@ -88,7 +88,7 @@ module A2A::Types
   ##
   # Represents the status of a task
   #
-  class TaskStatus < BaseModel
+  class TaskStatus < A2A::Types::BaseModel
     attr_reader :state, :message, :progress, :result, :error, :updated_at
 
     ##

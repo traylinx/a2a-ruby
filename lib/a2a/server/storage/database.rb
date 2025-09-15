@@ -6,17 +6,26 @@ rescue LoadError
   # ActiveRecord is optional - only load if available
 end
 
-##
-# Database storage backend for tasks using ActiveRecord
-#
-# This storage backend persists tasks to a database using ActiveRecord.
-# It requires ActiveRecord to be available and properly configured.
-#
-class A2A::Server::Storage::Database < Base
+module A2A
+  module Server
+    module Storage
+    end
+  end
+end
+
+# Only define the class if ActiveRecord is available
+if defined?(ActiveRecord)
+  ##
+  # Database storage backend for tasks using ActiveRecord
+  #
+  # This storage backend persists tasks to a database using ActiveRecord.
+  # It requires ActiveRecord to be available and properly configured.
+  #
+  class A2A::Server::Storage::Database < A2A::Server::Storage::Base
   ##
   # ActiveRecord model for task persistence
   #
-  class TaskRecord < ApplicationRecord
+  class TaskRecord < (defined?(ApplicationRecord) ? ApplicationRecord : ActiveRecord::Base)
     self.table_name = "a2a_tasks"
 
     validates :task_id, presence: true, uniqueness: true
@@ -194,5 +203,6 @@ class A2A::Server::Storage::Database < Base
   # @return [A2A::Types::Task] The deserialized task
   def deserialize_task(task_data)
     A2A::Types::Task.from_h(task_data)
+  end
   end
 end

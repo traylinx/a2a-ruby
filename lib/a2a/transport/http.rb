@@ -5,6 +5,11 @@ require "faraday/multipart"
 require "json"
 require "concurrent"
 
+module A2A
+  module Transport
+  end
+end
+
 ##
 # HTTP transport implementation using Faraday adapter pattern
 # Provides connection pooling, timeout management, logging, and HTTPS support

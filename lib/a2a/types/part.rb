@@ -7,7 +7,7 @@ module A2A::Types
   # Parts represent different types of content within a message.
   # This is an abstract base class - use TextPart, FilePart, or DataPart.
   #
-  class Part < BaseModel
+  class Part < A2A::Types::BaseModel
     attr_reader :kind, :metadata
 
     ##
@@ -182,7 +182,7 @@ module A2A::Types
   ##
   # Base class for file representations
   #
-  class FileBase < BaseModel
+  class FileBase < A2A::Types::BaseModel
     ##
     # Create a file from a hash (factory method)
     #

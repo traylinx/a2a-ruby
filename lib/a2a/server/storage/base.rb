@@ -1,5 +1,12 @@
 # frozen_string_literal: true
 
+module A2A
+  module Server
+    module Storage
+    end
+  end
+end
+
 ##
 # Abstract base class for task storage backends
 #

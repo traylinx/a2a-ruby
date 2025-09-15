@@ -72,7 +72,9 @@ class A2A::Server::PushNotificationManager
   #
   # @param task_id [String] The task ID
   # @return [Array<A2A::Types::TaskPushNotificationConfig>] List of configs
-  delegate :list_push_notification_configs, to: :@storage
+  def list_push_notification_configs(*args)
+    @storage.list_push_notification_configs(*args)
+  end
 
   ##
   # Delete a push notification config
@@ -80,7 +82,9 @@ class A2A::Server::PushNotificationManager
   # @param task_id [String] The task ID
   # @param config_id [String] The config ID
   # @return [Boolean] True if deleted, false if not found
-  delegate :delete_push_notification_config, to: :@storage
+  def delete_push_notification_config(*args)
+    @storage.delete_push_notification_config(*args)
+  end
 
   ##
   # Send a task status update notification

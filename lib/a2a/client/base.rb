@@ -167,19 +167,25 @@ class A2A::Client::Base
   # Check if the client supports streaming
   #
   # @return [Boolean] True if streaming is supported and enabled
-  delegate :streaming?, to: :@config
+  def streaming?
+    @config.streaming?
+  end
 
   ##
   # Check if the client supports polling
   #
   # @return [Boolean] True if polling is supported and enabled
-  delegate :polling?, to: :@config
+  def polling?
+    @config.polling?
+  end
 
   ##
   # Get the supported transports
   #
   # @return [Array<String>] List of supported transport protocols
-  delegate :supported_transports, to: :@config
+  def supported_transports
+    @config.supported_transports
+  end
 
   ##
   # Negotiate transport with agent card

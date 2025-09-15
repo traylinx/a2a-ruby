@@ -153,7 +153,9 @@ module A2A
 
     # Configure plugins from hash
     # @param plugin_configs [Hash] Plugin configurations
-    delegate :configure_plugins, to: :plugins
+    def configure_plugins(*args)
+      plugins.configure_plugins(*args)
+    end
 
     # Initialize monitoring system
     # @param config [A2A::Configuration] Configuration instance
@@ -163,11 +165,15 @@ module A2A
 
     # Get monitoring metrics
     # @return [A2A::Monitoring::MetricsCollector]
-    delegate :metrics, to: :"A2A::Monitoring"
+    def metrics
+      A2A::Monitoring.metrics
+    end
 
     # Get structured logger
     # @return [A2A::Monitoring::StructuredLogger]
-    delegate :logger, to: :"A2A::Monitoring"
+    def logger
+      A2A::Monitoring.logger
+    end
 
     # Record a metric
     # @param name [String] Metric name

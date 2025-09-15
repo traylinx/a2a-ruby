@@ -52,7 +52,9 @@ module A2A::Server::Middleware
 
     ##
     # Clear all middleware
-    delegate :clear, to: :@middleware
+    def clear
+      @middleware.clear
+    end
 
     ##
     # Get middleware count

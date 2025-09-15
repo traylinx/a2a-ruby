@@ -22,7 +22,7 @@ module A2A::Types
   #     default_output_modes: ["text"]
   #   )
   #
-  class AgentCard < BaseModel
+  class AgentCard < A2A::Types::BaseModel
     attr_reader :name, :description, :version, :url, :preferred_transport,
       :skills, :capabilities, :default_input_modes, :default_output_modes,
       :additional_interfaces, :security, :security_schemes, :provider,
@@ -204,7 +204,7 @@ module A2A::Types
   #     security: ["api_key"]
   #   )
   #
-  class AgentSkill < BaseModel
+  class AgentSkill < A2A::Types::BaseModel
     attr_reader :id, :name, :description, :tags, :examples, :input_modes, :output_modes, :security
 
     ##
@@ -309,7 +309,7 @@ module A2A::Types
   #     extensions: ["custom-extension-1"]
   #   )
   #
-  class AgentCapabilities < BaseModel
+  class AgentCapabilities < A2A::Types::BaseModel
     attr_reader :streaming, :push_notifications, :state_transition_history, :extensions
 
     ##
@@ -385,7 +385,7 @@ module A2A::Types
   #     url: "https://example.com/agent/rpc"
   #   )
   #
-  class AgentInterface < BaseModel
+  class AgentInterface < A2A::Types::BaseModel
     attr_reader :transport, :url
 
     ##
@@ -447,7 +447,7 @@ module A2A::Types
   #     protected_header: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9"
   #   )
   #
-  class AgentCardSignature < BaseModel
+  class AgentCardSignature < A2A::Types::BaseModel
     attr_reader :signature, :protected_header
 
     ##

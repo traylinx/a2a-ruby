@@ -2,6 +2,11 @@
 
 require "monitor"
 
+module A2A
+  module Monitoring
+  end
+end
+
 ##
 # Metrics collector for performance monitoring and alerting
 #

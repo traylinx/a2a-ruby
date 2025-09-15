@@ -7,7 +7,7 @@ module A2A::Types
   # These events are sent when a task's status changes, allowing clients
   # to track task progress in real-time.
   #
-  class TaskStatusUpdateEvent < BaseModel
+  class TaskStatusUpdateEvent < A2A::Types::BaseModel
     attr_reader :task_id, :context_id, :status, :metadata
 
     ##
@@ -58,7 +58,7 @@ module A2A::Types
   # These events are sent when artifacts are added or updated for a task,
   # supporting streaming artifact delivery.
   #
-  class TaskArtifactUpdateEvent < BaseModel
+  class TaskArtifactUpdateEvent < A2A::Types::BaseModel
     attr_reader :task_id, :context_id, :artifact, :append, :metadata
 
     ##

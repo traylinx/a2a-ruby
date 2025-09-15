@@ -7,7 +7,7 @@ module A2A::Types
   # Push notification configs define how and where to send notifications
   # about task updates and other events.
   #
-  class PushNotificationConfig < BaseModel
+  class PushNotificationConfig < A2A::Types::BaseModel
     attr_reader :id, :url, :token, :authentication
 
     ##
@@ -83,7 +83,7 @@ module A2A::Types
   # Links a task to a push notification configuration for receiving
   # updates about that specific task.
   #
-  class TaskPushNotificationConfig < BaseModel
+  class TaskPushNotificationConfig < A2A::Types::BaseModel
     attr_reader :task_id, :push_notification_config
 
     ##
@@ -114,13 +114,17 @@ module A2A::Types
     # Get authentication headers
     #
     # @return [Hash] Authentication headers
-    delegate :auth_headers, to: :@push_notification_config
+    def auth_headers
+      @push_notification_config.auth_headers
+    end
 
     ##
     # Check if authentication is configured
     #
     # @return [Boolean] True if authentication is present
-    delegate :authenticated?, to: :@push_notification_config
+    def authenticated?
+      @push_notification_config.authenticated?
+    end
 
     private
 

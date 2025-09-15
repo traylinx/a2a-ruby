@@ -6,7 +6,7 @@
 # Messages are the primary means of communication between agents and users.
 # They contain one or more parts (text, files, or data) and metadata.
 #
-class A2A::Types::Message < BaseModel
+class A2A::Types::Message < A2A::Types::BaseModel
   attr_reader :message_id, :role, :parts, :context_id, :task_id, :kind,
     :metadata, :extensions, :reference_task_ids
 

@@ -7,7 +7,7 @@ module A2A::Types
   # Security schemes define how authentication and authorization
   # should be handled for agent interactions.
   #
-  class SecurityScheme < BaseModel
+  class SecurityScheme < A2A::Types::BaseModel
     attr_reader :type
 
     ##

@@ -14,7 +14,7 @@ end
 # It's suitable for distributed deployments and provides good performance
 # for task storage and retrieval.
 #
-class A2A::Server::Storage::Redis < Base
+class A2A::Server::Storage::Redis < A2A::Server::Storage::Base
   # Redis key prefixes
   TASK_KEY_PREFIX = "a2a:task:"
   CONTEXT_KEY_PREFIX = "a2a:context:"
@@ -196,7 +196,9 @@ class A2A::Server::Storage::Redis < Base
   # Get Redis info
   #
   # @return [Hash] Redis server info
-  delegate :info, to: :@redis
+  def info
+    @redis.info
+  end
 
   ##
   # Flush all A2A data from Redis (dangerous!)

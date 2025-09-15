@@ -2,6 +2,11 @@
 
 require "time"
 
+module A2A
+  module Types
+  end
+end
+
 ##
 # Base class for all A2A protocol types
 #
@@ -112,7 +117,9 @@ class A2A::Types::BaseModel
   # Generate hash code for the model
   #
   # @return [Integer] The hash code
-  delegate :hash, to: :to_h
+  def hash
+    to_h.hash
+  end
 
   ##
   # Check if the model is valid
