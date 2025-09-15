@@ -11,11 +11,11 @@ module A2A
     # @example Basic usage
     #   class MyAgentController < ApplicationController
     #     include A2A::Rails::ControllerHelpers
-    #     
+    #
     #     a2a_skill "greeting" do |skill|
     #       skill.description = "Greet users"
     #     end
-    #     
+    #
     #     a2a_method "greet" do |params|
     #       { message: "Hello, #{params[:name]}!" }
     #     end
@@ -31,10 +31,10 @@ module A2A
         # Set up before actions for A2A requests
         before_action :authenticate_a2a_request, if: :a2a_request?
         before_action :set_a2a_headers, if: :a2a_request?
-        
+
         # Skip CSRF protection for A2A endpoints
         skip_before_action :verify_authenticity_token, if: :a2a_request?
-        
+
         # Handle A2A-specific exceptions
         rescue_from A2A::Errors::A2AError, with: :handle_a2a_error
         rescue_from A2A::Errors::TaskNotFound, with: :handle_task_not_found
@@ -55,7 +55,7 @@ module A2A
         # @example
         #   class ChatController < ApplicationController
         #     include A2A::Rails::ControllerHelpers
-        #     
+        #
         #     a2a_agent name: "Chat Assistant",
         #               description: "A helpful chat assistant",
         #               version: "1.0.0",
@@ -68,7 +68,7 @@ module A2A
 
         # Get the A2A agent configuration
         def a2a_agent_config
-          @_a2a_agent_config ||= {}
+          @a2a_agent_config ||= {}
         end
 
         ##
@@ -97,7 +97,7 @@ module A2A
 
         # Get the A2A authentication configuration
         def a2a_auth_config
-          @_a2a_auth_config ||= { strategy: :none, methods: [], options: {}, block: nil }
+          @a2a_auth_config ||= { strategy: :none, methods: [], options: {}, block: nil }
         end
       end
 
@@ -111,10 +111,10 @@ module A2A
       #
       def handle_a2a_rpc
         request_body = request.body.read
-        
+
         begin
           json_rpc_request = A2A::Protocol::JsonRpc.parse_request(request_body)
-          
+
           # Handle batch requests
           if json_rpc_request.is_a?(Array)
             responses = json_rpc_request.map { |req| handle_single_a2a_request(req) }
@@ -139,7 +139,7 @@ module A2A
       #
       def generate_agent_card(authenticated: false)
         config = self.class.a2a_agent_config
-        
+
         # Build base agent card
         card_data = {
           name: config[:name] || controller_name.humanize,
@@ -161,9 +161,7 @@ module A2A
         }
 
         # Add authenticated-specific information
-        if authenticated && current_user_authenticated?
-          card_data = enhance_authenticated_card(card_data)
-        end
+        card_data = enhance_authenticated_card(card_data) if authenticated && current_user_authenticated?
 
         A2A::Types::AgentCard.new(**card_data)
       end
@@ -175,21 +173,19 @@ module A2A
       # @param format [Symbol] Response format (:json, :jws)
       #
       def render_agent_card(authenticated: false, format: :json)
-        begin
-          card = generate_agent_card(authenticated: authenticated)
-          
-          case format
-          when :json
-            render json: card.to_h
-          when :jws
-            # TODO: Implement JWS signing
-            render json: { error: "JWS format not yet implemented" }, status: :not_implemented
-          else
-            render json: card.to_h
-          end
-        rescue StandardError => e
-          render json: { error: e.message }, status: :internal_server_error
+        card = generate_agent_card(authenticated: authenticated)
+
+        case format
+        when :json
+          render json: card.to_h
+        when :jws
+          # TODO: Implement JWS signing
+          render json: { error: "JWS format not yet implemented" }, status: :not_implemented
+        else
+          render json: card.to_h
         end
+      rescue StandardError => e
+        render json: { error: e.message }, status: :internal_server_error
       end
 
       ##
@@ -199,8 +195,8 @@ module A2A
       #
       def a2a_request?
         request.path.start_with?(A2A.config.mount_path) ||
-        request.headers["Content-Type"]&.include?("application/json-rpc") ||
-        params[:controller] == "a2a/rails/a2a"
+          request.headers["Content-Type"]&.include?("application/json-rpc") ||
+          params[:controller] == "a2a/rails/a2a"
       end
 
       ##
@@ -212,7 +208,7 @@ module A2A
       #
       def current_user_authenticated?
         auth_config = self.class.a2a_auth_config
-        
+
         case auth_config[:strategy]
         when :devise
           respond_to?(:current_user) && current_user.present?
@@ -269,10 +265,8 @@ module A2A
 
       def handle_single_a2a_request(json_rpc_request)
         # Check method-level authentication
-        if method_requires_authentication?(json_rpc_request.method)
-          unless current_user_authenticated?
-            raise A2A::Errors::AuthenticationError, "Authentication required for method: #{json_rpc_request.method}"
-          end
+        if method_requires_authentication?(json_rpc_request.method) && !current_user_authenticated?
+          raise A2A::Errors::AuthenticationError, "Authentication required for method: #{json_rpc_request.method}"
         end
 
         # Delegate to the A2A request handler from Server::Agent
@@ -299,7 +293,7 @@ module A2A
       def authenticate_a2a_request
         return unless A2A.config.authentication_required
         return if current_user_authenticated?
-        
+
         raise A2A::Errors::AuthenticationError, "Authentication required"
       end
 
@@ -335,7 +329,7 @@ module A2A
 
       def build_additional_interfaces
         interfaces = []
-        
+
         # Add gRPC interface if available
         if defined?(A2A::Transport::Grpc)
           interfaces << {
@@ -343,19 +337,19 @@ module A2A
             url: grpc_endpoint_url
           }
         end
-        
+
         # Add HTTP+JSON interface
         interfaces << {
           transport: "HTTP+JSON",
           url: http_json_endpoint_url
         }
-        
+
         interfaces
       end
 
       def build_security_config
         auth_config = self.class.a2a_auth_config
-        
+
         case auth_config[:strategy]
         when :jwt
           {
@@ -387,7 +381,11 @@ module A2A
       def build_provider_info
         {
           name: Rails.application.class.module_parent_name,
-          version: Rails.application.config.version rescue "1.0.0",
+          version: begin
+            Rails.application.config.version
+          rescue StandardError
+            "1.0.0"
+          end,
           url: root_url
         }
       end
@@ -414,7 +412,7 @@ module A2A
           rails_version: Rails.version,
           created_at: Time.now.iso8601
         }
-        
+
         base_metadata.merge(config[:metadata] || {})
       end
 
@@ -435,9 +433,9 @@ module A2A
       def jwt_authenticated?
         auth_header = request.headers["Authorization"]
         return false unless auth_header&.start_with?("Bearer ")
-        
-        token = auth_header.split(" ").last
-        
+
+        token = auth_header.split.last
+
         begin
           # Basic JWT validation - applications should override this
           JWT.decode(token, nil, false)
@@ -450,7 +448,7 @@ module A2A
       def api_key_authenticated?
         api_key = request.headers["X-API-Key"] || params[:api_key]
         return false unless api_key.present?
-        
+
         # Basic API key validation - applications should override this
         # In a real application, this would check against a database or configuration
         api_key.length >= 32 # Simple validation
@@ -477,7 +475,7 @@ module A2A
 
       def grpc_port
         # Default gRPC port - applications can override this
-        Rails.env.production? ? 443 : 50051
+        Rails.env.production? ? 443 : 50_051
       end
 
       # Exception handlers

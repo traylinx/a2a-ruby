@@ -11,20 +11,20 @@ class DemoAgent
 
   # Configure the agent
   a2a_config name: "Demo A2A Agent",
-    description: "Demonstrates A2A protocol methods",
-    version: "1.0.0",
-    default_input_modes: ["text"],
-    default_output_modes: ["text"]
+             description: "Demonstrates A2A protocol methods",
+             version: "1.0.0",
+             default_input_modes: ["text"],
+             default_output_modes: ["text"]
 
   # Define a simple capability
   a2a_capability "echo" do
     method :echo
     description "Echo back the input message"
     input_schema type: "object",
-      properties: { message: { type: "string" } },
-      required: ["message"]
+                 properties: { message: { type: "string" } },
+                 required: ["message"]
     output_schema type: "object",
-      properties: { echo: { type: "string" } }
+                  properties: { echo: { type: "string" } }
     tags %w[utility demo]
   end
 
@@ -128,9 +128,9 @@ context = A2A::Server::Context.new
 # Demo 1: Get agent card
 puts "1. Getting agent card..."
 card_result = agent.handle_agent_get_card({}, context)
-puts "Agent name: #{card_result[:agent_card]["name"]}"
-puts "Agent description: #{card_result[:agent_card]["description"]}"
-puts "Supports streaming: #{card_result[:agent_card]["capabilities"]["streaming"]}"
+puts "Agent name: #{card_result[:agent_card]['name']}"
+puts "Agent description: #{card_result[:agent_card]['description']}"
+puts "Supports streaming: #{card_result[:agent_card]['capabilities']['streaming']}"
 puts
 
 # Demo 2: Send a message (blocking)
@@ -145,12 +145,12 @@ message_data = {
 }
 
 send_result = agent.handle_message_send({
-  "message" => message_data,
-  "blocking" => true
-}, context)
+                                          "message" => message_data,
+                                          "blocking" => true
+                                        }, context)
 
 puts "Task ID: #{send_result[:task_id]}"
-puts "Result: #{send_result[:result][:message]["parts"].first["text"]}"
+puts "Result: #{send_result[:result][:message]['parts'].first['text']}"
 puts
 
 # Demo 3: Create and manage a task
@@ -165,11 +165,11 @@ puts "Initial status: #{task.status.state}"
 
 # Get the task
 get_result = agent.handle_tasks_get({ "id" => task.id }, context)
-puts "Retrieved task status: #{get_result[:task]["status"]["state"]}"
+puts "Retrieved task status: #{get_result[:task]['status']['state']}"
 
 # Cancel the task
 cancel_result = agent.handle_tasks_cancel({ "id" => task.id }, context)
-puts "Canceled task status: #{cancel_result[:status]["state"]}"
+puts "Canceled task status: #{cancel_result[:status]['state']}"
 puts
 
 # Demo 4: Push notification config
@@ -181,20 +181,20 @@ config_task = agent.task_manager.create_task(
 
 # Set push notification config
 set_result = agent.handle_push_notification_config_set({
-  "taskId" => config_task.id,
-  "config" => {
-    "url" => "https://example.com/webhook",
-    "token" => "demo-token"
-  }
-}, context)
+                                                         "taskId" => config_task.id,
+                                                         "config" => {
+                                                           "url" => "https://example.com/webhook",
+                                                           "token" => "demo-token"
+                                                         }
+                                                       }, context)
 
 puts "Set push notification config for task: #{set_result[:task_id]}"
-puts "Webhook URL: #{set_result[:config]["url"]}"
+puts "Webhook URL: #{set_result[:config]['url']}"
 
 # List configs
 list_result = agent.handle_push_notification_config_list({
-  "taskId" => config_task.id
-}, context)
+                                                           "taskId" => config_task.id
+                                                         }, context)
 
 puts "Number of configs: #{list_result[:configs].length}"
 puts
@@ -211,8 +211,8 @@ stream_message_data = {
 }
 
 stream_result = agent.handle_message_stream({
-  "message" => stream_message_data
-}, context)
+                                              "message" => stream_message_data
+                                            }, context)
 
 puts "Streaming responses:"
 stream_result.each_with_index do |response, index|

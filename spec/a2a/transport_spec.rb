@@ -259,8 +259,8 @@ RSpec.describe A2A::Transport do
       describe "error mapping" do
         it "maps gRPC errors to A2A errors" do
           grpc_error = double("GRPC::BadStatus",
-            code: GRPC::Core::StatusCodes::NOT_FOUND,
-            details: "Task not found")
+                              code: GRPC::Core::StatusCodes::NOT_FOUND,
+                              details: "Task not found")
 
           mapped_error = transport.send(:map_grpc_error, grpc_error)
           expect(mapped_error).to be_a(A2A::Errors::TaskNotFound)

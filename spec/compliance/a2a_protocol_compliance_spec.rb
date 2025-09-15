@@ -38,9 +38,9 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
       it "supports streaming parameter" do
         message = build_message
         request = build_json_rpc_request("message/send", {
-          message: message,
-          streaming: true
-        })
+                                           message: message,
+                                           streaming: true
+                                         })
 
         expect(request[:params][:streaming]).to be true
       end
@@ -50,9 +50,9 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
         context = { timeout: 30, priority: "high" }
 
         request = build_json_rpc_request("message/send", {
-          message: message,
-          context: context
-        })
+                                           message: message,
+                                           context: context
+                                         })
 
         expect(request[:params][:context]).to eq(context)
       end
@@ -79,18 +79,18 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
 
       it "supports historyLength parameter" do
         request = build_json_rpc_request("tasks/get", {
-          id: test_uuid,
-          historyLength: 10
-        })
+                                           id: test_uuid,
+                                           historyLength: 10
+                                         })
 
         expect(request[:params][:historyLength]).to eq(10)
       end
 
       it "supports context parameter" do
         request = build_json_rpc_request("tasks/get", {
-          id: test_uuid,
-          context: { includeArtifacts: true }
-        })
+                                           id: test_uuid,
+                                           context: { includeArtifacts: true }
+                                         })
 
         expect(request[:params][:context][:includeArtifacts]).to be true
       end
@@ -107,9 +107,9 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
 
       it "supports reason parameter" do
         request = build_json_rpc_request("tasks/cancel", {
-          id: test_uuid,
-          reason: "User requested cancellation"
-        })
+                                           id: test_uuid,
+                                           reason: "User requested cancellation"
+                                         })
 
         expect(request[:params][:reason]).to eq("User requested cancellation")
       end
@@ -135,8 +135,8 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
 
       it "supports context parameter" do
         request = build_json_rpc_request("agent/getCard", {
-          context: { includeExtended: true }
-        })
+                                           context: { includeExtended: true }
+                                         })
 
         expect(request[:params][:context][:includeExtended]).to be true
       end
@@ -157,9 +157,9 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
       it "accepts valid set requests" do
         config = build(:push_notification_config)
         request = build_json_rpc_request("tasks/pushNotificationConfig/set", {
-          taskId: test_uuid,
-          pushNotificationConfig: config
-        })
+                                           taskId: test_uuid,
+                                           pushNotificationConfig: config
+                                         })
 
         expect(request).to be_valid_json_rpc_request
         expect(request[:params][:pushNotificationConfig]).to be_valid_push_notification_config
@@ -169,9 +169,9 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
     context "tasks/pushNotificationConfig/get method" do
       it "accepts valid get requests" do
         request = build_json_rpc_request("tasks/pushNotificationConfig/get", {
-          taskId: test_uuid,
-          id: test_uuid
-        })
+                                           taskId: test_uuid,
+                                           id: test_uuid
+                                         })
 
         expect(request).to be_valid_json_rpc_request
       end
@@ -180,8 +180,8 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
     context "tasks/pushNotificationConfig/list method" do
       it "accepts valid list requests" do
         request = build_json_rpc_request("tasks/pushNotificationConfig/list", {
-          taskId: test_uuid
-        })
+                                           taskId: test_uuid
+                                         })
 
         expect(request).to be_valid_json_rpc_request
       end
@@ -190,9 +190,9 @@ RSpec.describe "A2A Protocol Compliance", :compliance do
     context "tasks/pushNotificationConfig/delete method" do
       it "accepts valid delete requests" do
         request = build_json_rpc_request("tasks/pushNotificationConfig/delete", {
-          taskId: test_uuid,
-          id: test_uuid
-        })
+                                           taskId: test_uuid,
+                                           id: test_uuid
+                                         })
 
         expect(request).to be_valid_json_rpc_request
       end

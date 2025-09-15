@@ -34,10 +34,10 @@ RSpec.describe "A2A Load Testing", :load_testing, :performance do
           ) do |client_id|
             # Simulate client making JSON-RPC request
             request = build_json_rpc_request("load_test", {
-              client_id: client_id,
-              timestamp: Time.current.to_f,
-              data: "x" * 100 # 100 bytes payload
-            })
+                                               client_id: client_id,
+                                               timestamp: Time.current.to_f,
+                                               data: "x" * 100 # 100 bytes payload
+                                             })
 
             # Mock HTTP request to server
             start_time = Time.current
@@ -117,10 +117,10 @@ RSpec.describe "A2A Load Testing", :load_testing, :performance do
 
               requests_in_burst.times do |req_num|
                 request = build_json_rpc_request("burst_test", {
-                  burst: burst_number,
-                  thread: thread_id,
-                  request: req_num
-                })
+                                                   burst: burst_number,
+                                                   thread: thread_id,
+                                                   request: req_num
+                                                 })
 
                 start_time = Time.current
 
@@ -462,9 +462,9 @@ RSpec.describe "A2A Load Testing", :load_testing, :performance do
           # Perform operations
           100.times do
             request = build_json_rpc_request("memory_load_test", {
-              timestamp: Time.current.to_f,
-              data: "x" * 500 # 500 bytes per request
-            })
+                                               timestamp: Time.current.to_f,
+                                               data: "x" * 500 # 500 bytes per request
+                                             })
 
             A2A::Protocol::JsonRpc.parse_request(request.to_json)
 
@@ -529,10 +529,10 @@ RSpec.describe "A2A Load Testing", :load_testing, :performance do
             (operations / 5).times do |i|
               # Create temporary objects
               request = build_json_rpc_request("cleanup_test_#{thread_id}_#{i}", {
-                thread_id: thread_id,
-                operation_id: i,
-                payload: "x" * 200
-              })
+                                                 thread_id: thread_id,
+                                                 operation_id: i,
+                                                 payload: "x" * 200
+                                               })
 
               parsed = A2A::Protocol::JsonRpc.parse_request(request.to_json)
 
@@ -590,10 +590,10 @@ RSpec.describe "A2A Load Testing", :load_testing, :performance do
 
               begin
                 request = build_json_rpc_request("extreme_load_#{thread_id}_#{op_id}", {
-                  thread_id: thread_id,
-                  operation_id: op_id,
-                  timestamp: Time.current.to_f
-                })
+                                                   thread_id: thread_id,
+                                                   operation_id: op_id,
+                                                   timestamp: Time.current.to_f
+                                                 })
 
                 A2A::Protocol::JsonRpc.parse_request(request.to_json)
 
@@ -649,8 +649,8 @@ RSpec.describe "A2A Load Testing", :load_testing, :performance do
         measure_time do
           1000.times do |i|
             request = build_json_rpc_request("exhaustion_#{i}", {
-              data: "x" * 10_000 # 10KB per request
-            })
+                                               data: "x" * 10_000 # 10KB per request
+                                             })
             A2A::Protocol::JsonRpc.parse_request(request.to_json)
           end
         rescue StandardError
@@ -699,9 +699,9 @@ RSpec.describe "A2A Load Testing", :load_testing, :performance do
           run_concurrently(thread_count: 10) do |thread_id|
             100.times do |i|
               request = build_json_rpc_request("concurrent_#{thread_id}_#{i}", {
-                thread_id: thread_id,
-                index: i
-              })
+                                                 thread_id: thread_id,
+                                                 index: i
+                                               })
               A2A::Protocol::JsonRpc.parse_request(request.to_json)
             end
           end
@@ -714,8 +714,8 @@ RSpec.describe "A2A Load Testing", :load_testing, :performance do
 
           1000.times do |i|
             request = build_json_rpc_request("memory_baseline_#{i}", {
-              data: "x" * 500
-            })
+                                               data: "x" * 500
+                                             })
             A2A::Protocol::JsonRpc.parse_request(request.to_json)
           end
 

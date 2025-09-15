@@ -31,20 +31,22 @@ require_relative "a2a/rails/controller_helpers"
 require_relative "a2a/rails/a2a_controller"
 
 # Extend A2A configuration for Rails-specific options
-class A2A::Configuration
-  # Rails integration settings
-  attr_accessor :rails_integration, :mount_path, :auto_mount,
-    :middleware_enabled, :webhook_authentication_required
+module A2A
+  class Configuration
+    # Rails integration settings
+    attr_accessor :rails_integration, :mount_path, :auto_mount,
+                  :middleware_enabled, :webhook_authentication_required
 
-  def initialize
-    super
+    def initialize
+      super
 
-    # Rails-specific defaults
-    @rails_integration = false
-    @mount_path = "/a2a"
-    @auto_mount = true
-    @middleware_enabled = true
-    @webhook_authentication_required = false
+      # Rails-specific defaults
+      @rails_integration = false
+      @mount_path = "/a2a"
+      @auto_mount = true
+      @middleware_enabled = true
+      @webhook_authentication_required = false
+    end
   end
 end
 

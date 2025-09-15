@@ -92,7 +92,7 @@ require_relative "support/fixture_generators"
 require_relative "support/factory_bot"
 
 # Load any additional support files
-Dir[File.expand_path("support/**/*.rb", __dir__)].sort.each { |f| require f }
+Dir[File.expand_path("support/**/*.rb", __dir__)].each { |f| require f }
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure (equivalent to pytest markers)

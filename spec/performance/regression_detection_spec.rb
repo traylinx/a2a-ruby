@@ -246,9 +246,9 @@ RSpec.describe "Performance Regression Detection", :performance, :regression do
         baseline_age = Time.current - Time.zone.parse(loaded_baseline["created_at"])
         expect(baseline_age).to be > 0
 
-        puts "Loaded baseline from #{loaded_baseline["created_at"]}"
+        puts "Loaded baseline from #{loaded_baseline['created_at']}"
         puts "Baseline age: #{(baseline_age / 3600).round(1)} hours"
-        puts "Ruby version: #{loaded_baseline["ruby_version"]}"
+        puts "Ruby version: #{loaded_baseline['ruby_version']}"
       end
     end
   end
@@ -329,7 +329,7 @@ RSpec.describe "Performance Regression Detection", :performance, :regression do
                    end
 
           puts "  #{operation}: #{(current_time * 1000).round(3)}ms (baseline: #{(baseline_time * 1000).round(3)}ms) [#{status}]"
-          puts "    Change: #{"+" if regression_percent > 0}#{regression_percent}%"
+          puts "    Change: #{'+' if regression_percent > 0}#{regression_percent}%"
         end
 
         if regressions.any?
@@ -340,7 +340,7 @@ RSpec.describe "Performance Regression Detection", :performance, :regression do
         end
 
         # For this test, we expect no regressions (current performance should be similar to baseline)
-        expect(regressions).to be_empty, "Performance regressions detected: #{regressions.pluck(:operation).join(", ")}"
+        expect(regressions).to be_empty, "Performance regressions detected: #{regressions.pluck(:operation).join(', ')}"
       end
     end
 
@@ -415,7 +415,7 @@ RSpec.describe "Performance Regression Detection", :performance, :regression do
                    end
 
           puts "  #{operation}: #{current_tps.round(0)} ops/sec (baseline: #{baseline_tps} ops/sec) [#{status}]"
-          puts "    Change: #{regression_percent > 0 ? "-" : "+"}#{regression_percent.abs}%"
+          puts "    Change: #{regression_percent > 0 ? '-' : '+'}#{regression_percent.abs}%"
         end
 
         if regressions.any?
@@ -426,7 +426,7 @@ RSpec.describe "Performance Regression Detection", :performance, :regression do
         end
 
         # For this test, expect no significant throughput regressions
-        expect(regressions).to be_empty, "Throughput regressions detected: #{regressions.pluck(:operation).join(", ")}"
+        expect(regressions).to be_empty, "Throughput regressions detected: #{regressions.pluck(:operation).join(', ')}"
       end
     end
 
@@ -508,7 +508,7 @@ RSpec.describe "Performance Regression Detection", :performance, :regression do
                    end
 
           puts "  #{operation}: #{current_mb.round(3)}MB (baseline: #{baseline_mb}MB) [#{status}]"
-          puts "    Change: #{"+" if regression_percent > 0}#{regression_percent}%"
+          puts "    Change: #{'+' if regression_percent > 0}#{regression_percent}%"
         end
 
         if regressions.any?
@@ -520,7 +520,7 @@ RSpec.describe "Performance Regression Detection", :performance, :regression do
 
         # Allow some memory variance but not excessive
         expect(regressions).to be_empty,
-          "Memory usage regressions detected: #{regressions.pluck(:operation).join(", ")}"
+                               "Memory usage regressions detected: #{regressions.pluck(:operation).join(', ')}"
       end
     end
 
@@ -589,7 +589,7 @@ RSpec.describe "Performance Regression Detection", :performance, :regression do
                    end
 
           puts "  #{operation}: #{current_gcs} GCs (baseline: #{baseline_gcs} GCs) [#{status}]"
-          puts "    Change: #{"+" if regression_percent > 0}#{regression_percent}%"
+          puts "    Change: #{'+' if regression_percent > 0}#{regression_percent}%"
         end
 
         if regressions.any?
@@ -601,7 +601,7 @@ RSpec.describe "Performance Regression Detection", :performance, :regression do
 
         # GC frequency can vary, but shouldn't increase dramatically
         expect(regressions).to be_empty,
-          "GC frequency regressions detected: #{regressions.pluck(:operation).join(", ")}"
+                               "GC frequency regressions detected: #{regressions.pluck(:operation).join(', ')}"
       end
     end
   end
@@ -844,7 +844,7 @@ RSpec.describe "Performance Regression Detection", :performance, :regression do
         trends.each do |metric, trend|
           puts "  #{metric}:"
           puts "    Direction: #{trend[:direction]}"
-          puts "    Total Change: #{"+" if trend[:total_change_percent] > 0}#{trend[:total_change_percent]}%"
+          puts "    Total Change: #{'+' if trend[:total_change_percent] > 0}#{trend[:total_change_percent]}%"
           puts "    Start Value: #{trend[:start_value].round(6)}"
           puts "    End Value: #{trend[:end_value].round(6)}"
         end

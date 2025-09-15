@@ -253,9 +253,9 @@ RSpec.describe A2A::PluginManager do
   describe "#configure_plugins" do
     it "configures auto-loading plugins" do
       manager.configure_plugins({
-        test_transport: { auto_load: true },
-        test_auth: { auto_load: false }
-      })
+                                  test_transport: { auto_load: true },
+                                  test_auth: { auto_load: false }
+                                })
 
       manager.load_all_plugins
 
@@ -346,8 +346,8 @@ RSpec.describe A2A do
 
     it "configures plugins" do
       described_class.configure_plugins({
-        test_transport: { auto_load: true }
-      })
+                                          test_transport: { auto_load: true }
+                                        })
 
       expect(described_class.plugins.status[:auto_load_plugins]).to include(:test_transport)
     end

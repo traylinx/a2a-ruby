@@ -470,10 +470,10 @@ RSpec.describe "A2A Performance Benchmarks", :performance do
 
         # Save baselines for comparison
         save_fixture("performance_baselines.json", {
-          timestamp: Time.current.iso8601,
-          ruby_version: RUBY_VERSION,
-          baselines: baselines
-        })
+                       timestamp: Time.current.iso8601,
+                       ruby_version: RUBY_VERSION,
+                       baselines: baselines
+                     })
 
         puts "\nPerformance Baselines:"
         baselines.each do |operation, time|

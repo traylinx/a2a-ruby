@@ -9,8 +9,8 @@ RSpec.describe A2A::Server::A2AMethods do
       include A2A::Server::A2AMethods
 
       a2a_config name: "Test Agent",
-        description: "A test agent",
-        version: "1.0.0"
+                 description: "A test agent",
+                 version: "1.0.0"
 
       protected
 

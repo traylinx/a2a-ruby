@@ -203,7 +203,7 @@ module A2ATestDoubles
 
       response = instance_double(Faraday::Response)
       allow(response).to receive_messages(status: 200, body: response_body,
-        headers: { "Content-Type" => "application/json" }, success?: true)
+                                          headers: { "Content-Type" => "application/json" }, success?: true)
 
       response
     end
@@ -217,7 +217,7 @@ module A2ATestDoubles
 
       response = instance_double(Faraday::Response)
       allow(response).to receive_messages(status: 200, body: response_body,
-        headers: { "Content-Type" => "application/json" }, success?: true)
+                                          headers: { "Content-Type" => "application/json" }, success?: true)
 
       response
     end

@@ -21,9 +21,9 @@ RSpec.describe "A2A Memory Profiling", :memory, :performance do
         skip "GetProcessMem gem not available" unless defined?(GetProcessMem)
 
         request_json = build_json_rpc_request("memory_test", {
-          data: "x" * 10_000, # 10KB payload
-          metadata: (1..100).map { |i| { "key_#{i}" => "value_#{i}" } }
-        }).to_json
+                                                data: "x" * 10_000, # 10KB payload
+                                                metadata: (1..100).map { |i| { "key_#{i}" => "value_#{i}" } }
+                                              }).to_json
 
         result = measure_memory do
           100.times do
@@ -78,9 +78,9 @@ RSpec.describe "A2A Memory Profiling", :memory, :performance do
 
         batch_requests = (1..100).map do |i|
           build_json_rpc_request("batch_method_#{i}", {
-            index: i,
-            data: "x" * 1000 # 1KB per request
-          })
+                                   index: i,
+                                   data: "x" * 1000 # 1KB per request
+                                 })
         end
         batch_json = batch_requests.to_json
 
@@ -125,9 +125,9 @@ RSpec.describe "A2A Memory Profiling", :memory, :performance do
 
         while (Time.current - start_time) < 30
           request = build_json_rpc_request("sustained_#{operations}", {
-            timestamp: Time.current.to_f,
-            data: "x" * 500 # 500 bytes per request
-          })
+                                             timestamp: Time.current.to_f,
+                                             data: "x" * 500 # 500 bytes per request
+                                           })
 
           A2A::Protocol::JsonRpc.parse_request(request.to_json)
 
@@ -274,9 +274,9 @@ RSpec.describe "A2A Memory Profiling", :memory, :performance do
         # Placeholder for actual allocation tracking
 
         request_json = build_json_rpc_request("string_test", {
-          message: "Test string allocation patterns",
-          data: (1..100).map { |i| "String #{i}" }
-        }).to_json
+                                                message: "Test string allocation patterns",
+                                                data: (1..100).map { |i| "String #{i}" }
+                                              }).to_json
 
         # Track allocations during parsing
 
@@ -318,9 +318,9 @@ RSpec.describe "A2A Memory Profiling", :memory, :performance do
 
         batch_requests = (1..100).map do |i|
           build_json_rpc_request("array_test_#{i}", {
-            items: (1..10).map { |j| "Item #{i}-#{j}" },
-            metadata: [i, Time.current.to_f, "test"]
-          })
+                                   items: (1..10).map { |j| "Item #{i}-#{j}" },
+                                   metadata: [i, Time.current.to_f, "test"]
+                                 })
         end
 
         batch_json = batch_requests.to_json
@@ -346,10 +346,10 @@ RSpec.describe "A2A Memory Profiling", :memory, :performance do
         1000.times do |i|
           # Create temporary objects
           request = build_json_rpc_request("gc_test_#{i}", {
-            temporary_data: "x" * 1000,
-            array_data: (1..100).to_a,
-            hash_data: (1..50).to_h { |j| ["key_#{j}", "value_#{j}"] }
-          })
+                                             temporary_data: "x" * 1000,
+                                             array_data: (1..100).to_a,
+                                             hash_data: (1..50).to_h { |j| ["key_#{j}", "value_#{j}"] }
+                                           })
 
           A2A::Protocol::JsonRpc.parse_request(request.to_json)
 

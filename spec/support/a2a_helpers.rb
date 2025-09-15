@@ -136,7 +136,7 @@ module A2AHelpers
 
     # Set up default responses
     allow(client).to receive_messages(send_message: build_message(role: "agent"), get_task: build_task,
-      cancel_task: build_task(state: "canceled"), get_card: build_agent_card)
+                                      cancel_task: build_task(state: "canceled"), get_card: build_agent_card)
 
     # Override with custom responses
     responses.each do |method, response|

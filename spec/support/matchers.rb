@@ -321,7 +321,7 @@ module A2AMatchers
     end
 
     failure_message do |actual|
-      "expected #{actual} to be a valid transport protocol (#{A2A::Types::VALID_TRANSPORTS.join(", ")})"
+      "expected #{actual} to be a valid transport protocol (#{A2A::Types::VALID_TRANSPORTS.join(', ')})"
     end
   end
 
@@ -332,7 +332,7 @@ module A2AMatchers
     end
 
     failure_message do |actual|
-      "expected #{actual} to be a valid task state (#{A2A::Types::VALID_TASK_STATES.join(", ")})"
+      "expected #{actual} to be a valid task state (#{A2A::Types::VALID_TASK_STATES.join(', ')})"
     end
   end
 
@@ -343,7 +343,7 @@ module A2AMatchers
     end
 
     failure_message do |actual|
-      "expected #{actual} to be a valid message role (#{A2A::Types::VALID_ROLES.join(", ")})"
+      "expected #{actual} to be a valid message role (#{A2A::Types::VALID_ROLES.join(', ')})"
     end
   end
 end
