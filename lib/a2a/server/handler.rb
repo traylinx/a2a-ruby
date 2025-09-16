@@ -202,7 +202,7 @@ module A2A
       # @param method_name [String] The method name
       # @return [A2A::Protocol::Capability, nil] The capability or nil if not found
       def find_capability_by_method(method_name)
-        @agent.class.a2a_capability_registry.find_by(method: method_name).first
+        @agent.class.a2a_capability_registry.find_by_method(method_name).first
       end
 
       private
